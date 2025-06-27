@@ -1,0 +1,41 @@
+.cuadrante1 {
+    border: 8px solid black;
+    border-radius: 10px;
+    padding: 10px;
+    margin-bottom: 20px;
+    background: linear-gradient(#f0f0f0, #72a7b3);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transition: transform 0.2s;
+    min-height: 400px;
+}
+.cuadrante2 {
+    border: 8px solid black;
+    border-radius: 10px;
+    padding: 10px;
+    min-height: 400px;
+    margin-bottom: 20px;
+    background: linear-gradient(#f0f0f0, #72a7b3);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transition: transform 0.2s;
+}
+.cuadrante3 {
+    border: 8px solid black;
+    border-radius: 10px;
+    padding: 10px;
+    min-height: 400px;
+    margin-bottom: 20px;
+    background: linear-gradient(#f0f0f0, #72a7b3);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transition: transform 0.2s;
+}
+.cuadrante4 {
+    border: 8px solid black;
+    border-radius: 10px;
+    padding: 10px;
+    min-height: 400px;
+    margin-bottom: 20px;
+    background: linear-gradient(#f0f0f0, #72a7b3);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transition: transform 0.2s;
+}
+

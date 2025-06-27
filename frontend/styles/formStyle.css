@@ -1,0 +1,96 @@
+/* formStyle.css */
+#task-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 24px;
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+#create-task-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+/* --- Inputs y Textareas --- */
+#task-form input[type="text"],
+#task-form textarea {
+  width: 90%;
+  padding: 12px;
+  border: 1.5px solid #ccc;
+  border-radius: 6px;
+  font-size: 1rem;
+  background-color: #fefefe;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+#task-form input[type="text"]:focus,
+#task-form textarea:focus {
+  border-color: #2c7be5;
+  box-shadow: 0 0 6px rgba(44, 123, 229, 0.3);
+  outline: none;
+}  
+
+/* --- Checkboxes --- */
+#task-form input[type="checkbox"] {
+  margin-right: 8px;
+  accent-color: #2c7be5; /* Modern checkbox color */
+}
+
+/* --- Etiquetas --- */
+#task-form label {
+  font-weight: 600;
+  color: #333;
+  display: block;
+  margin-bottom: 6px;
+}
+
+/* --- Botón de envío --- */
+#task-form button {
+  padding: 12px;
+  background-color: #2c7be5;
+  color: white;
+  font-weight: bold;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.25s ease, transform 0.15s ease;
+}
+
+#task-form button:hover {
+  background-color: #1a5fcc;
+  transform: scale(1.03);
+}
+
+#task-form button:active {
+  background-color: #174cb0;
+  transform: scale(0.98);
+}
+
+/* --- Errores --- */
+#task-form .error {
+  color: #d9534f;
+  font-size: 0.9rem;
+  margin-top: 4px;
+  margin-bottom: -10px;
+}
+
+/* --- Mensajes de éxito u otros --- */
+#task-form .success {
+  color: green;
+  font-size: 0.9rem;
+  margin-top: 4px;
+}
+
+/* --- Inputs con error (agregá clase input-error en JS) --- */
+.input-error {
+  border: 1.5px solid #d9534f !important;
+  background-color: #fff5f5;
+}
+
