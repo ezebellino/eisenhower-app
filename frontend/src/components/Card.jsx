@@ -1,4 +1,4 @@
-import { motion } from "framer-motion";
+import { color, motion } from "framer-motion";
 
 function Card({ task, onComplete, onDelete, onUncomplete, showOnlyCompletedActions = false }) {
   return (
@@ -43,7 +43,7 @@ function Card({ task, onComplete, onDelete, onUncomplete, showOnlyCompletedActio
       {task.completed && showOnlyCompletedActions && (
         <button
           onClick={() => onUncomplete(task.id)}
-          style={{ margin: "0.25rem", backgroundColor: "orange", color: "black", borderRadius: "8px" }}
+          style={{ margin: "0.5rem", padding: "0.5rem", backgroundColor: "orange", color: "white", fontSize: "1rem", fontWeight: "bold", borderRadius: "8px", cursor: "pointer", boxShadow: "2px 2px 8px rgba(0,0,0,0.1)", transition: "background-color 0.3s ease", ":hover": { backgroundColor: "#ff8c00", color: "black" } }}
         >
           Ups! Debo actualizar la tarea
         </button>
@@ -53,7 +53,7 @@ function Card({ task, onComplete, onDelete, onUncomplete, showOnlyCompletedActio
       {showOnlyCompletedActions && (
         <button
           onClick={() => onDelete(task.id)}
-          style={{ margin: "0.25rem", backgroundColor: "red", color: "white", borderRadius: "8px" }}
+          style={{ margin: "0.5rem", padding: "0.5rem", backgroundColor: "red", color: "white", fontSize: "1rem", fontWeight: "bold", borderRadius: "8px", cursor: "pointer" }}
         >
           Eliminar
         </button>

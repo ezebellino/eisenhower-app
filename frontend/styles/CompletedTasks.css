@@ -39,3 +39,13 @@
     transition: transform 0.2s;
 }
 
+.cuadrante1:hover, .cuadrante2:hover, .cuadrante3:hover, .cuadrante4:hover {
+    transform: scale(1.025);
+}
+
+h1:hover {
+    color: linear-gradient(#333 , #b9a811);
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    transition: color 2.3s ease;}
