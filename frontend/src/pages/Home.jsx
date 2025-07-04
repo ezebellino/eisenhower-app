@@ -2,6 +2,7 @@ import { useEffect, useState } from "react"
 import Card from "../components/Card"
 import { getAllTasks, completeTask, deleteTask, createTask, uncompleteTask } from "../services/taskServices"
 import "../../styles/CompletedTasks.css" // Asegúrate de tener este archivo CSS
+import "../../styles/Card.css" // Asegúrate de tener este archivo CSS
 
 function Home() {
   const [tasks, setTasks] = useState([])
@@ -26,11 +27,6 @@ function Home() {
     fetchTasks()
   }
 
-  const handleCreate = async (task) => {
-    await createTask(task)
-    fetchTasks()
-  }
-
   const handleUncomplete = async (id) => {
     await uncompleteTask(id)
     fetchTasks()
@@ -52,11 +48,18 @@ function Home() {
         gap: "1.5rem"
       }}>
         {/* Cuadrante 1 */}
-        <div className="cuadrante1">
+        <div className="cuadrante1 stack-container">
           <h3 style={{ textAlign: "center", marginBottom: "1rem" }}>🟥 Urgente e Importante</h3>
           {cuadrante1.length === 0 ? <p>En este momento no hay tareas en este cuadrante</p> :
-            cuadrante1.map(task => (
-              <Card key={task.id} task={task} onComplete={() => handleComplete(task.id)} onDelete={() => handleDelete(task.id)} onUncomplete={() => handleUncomplete(task.id)} />
+            cuadrante1.map((task, index) => (
+              <Card
+                key={task.id}
+                task={task}
+                onComplete={() => handleComplete(task.id)}
+                onDelete={() => handleDelete(task.id)}
+                onUncomplete={() => handleUncomplete(task.id)}
+                index={index}
+              />
             ))}
         </div>
 

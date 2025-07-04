@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom"
 import Card from "../components/Card"
 import { getCompletedTasks, uncompleteTask, deleteTask } from "../services/taskServices"
 import "../../styles/CompletedTasks.css" // Asegúrate de tener este archivo CSS
+import "../../styles/Card.css" // Asegúrate de tener este archivo CSS
 
 function CompletedTasks() {
   const [tasks, setTasks] = useState([])
@@ -44,61 +45,62 @@ function CompletedTasks() {
         gridTemplateRows: "1fr 1fr",
         gap: "1.5rem"
       }}>
-        <div className="cuadrante1">
+        <div className="cuadrante1 stack-container">
           <h3 style={{ textAlign: "center", marginBottom: "1rem" }}>🟥 Urgente e Importante</h3>
           {cuadrante1.length === 0 ? <p>No hay tareas</p> :
-            cuadrante1.map(task => (
+            cuadrante1.map((task, index) => (
               <Card
                 key={task.id}
                 task={task}
                 onDelete={handleDelete}
                 onUncomplete={handleUncomplete}
                 showOnlyCompletedActions={true}
+                index={index}
               />
             ))}
         </div>
 
-        <div className="cuadrante2">
+        <div className="cuadrante2 stack-container">
           <h3 style={{ textAlign: "center", marginBottom: "1rem" }}>🟧 Urgente pero NO importante</h3>
           {cuadrante2.length === 0 ? <p>No hay tareas</p> :
-            cuadrante2.map(task => (
+            cuadrante2.map((task, index) => (
               <Card
                 key={task.id}
                 task={task}
                 onDelete={handleDelete}
                 onUncomplete={handleUncomplete}
                 showOnlyCompletedActions={true}
-                onComplete={() => { }}
+                index={index}
               />
             ))}
         </div>
 
-        <div className="cuadrante3">
+        <div className="cuadrante3 stack-container">
           <h3 style={{ textAlign: "center", marginBottom: "1rem" }}>🟦 Importante pero NO urgente</h3>
           {cuadrante3.length === 0 ? <p>No hay tareas</p> :
-            cuadrante3.map(task => (
+            cuadrante3.map((task, index) => (
               <Card
                 key={task.id}
                 task={task}
                 onDelete={handleDelete}
                 onUncomplete={handleUncomplete}
                 showOnlyCompletedActions={true}
-                onComplete={() => { }}
+                index={index}
               />
             ))}
         </div>
 
-        <div className="cuadrante4">
+        <div className="cuadrante4 stack-container">
           <h3 style={{ textAlign: "center", marginBottom: "1rem" }}>🟩 Ni urgente ni importante</h3>
           {cuadrante4.length === 0 ? <p>No hay tareas</p> :
-            cuadrante4.map(task => (
+            cuadrante4.map((task, index) => (
               <Card
                 key={task.id}
                 task={task}
                 onDelete={handleDelete}
                 onUncomplete={handleUncomplete}
-                showOnlyCompletedActions={true} /* solo mostrar acciones de completado */
-                onComplete={() => { }}
+                showOnlyCompletedActions={true}
+                index={index}
               />
             ))}
         </div>

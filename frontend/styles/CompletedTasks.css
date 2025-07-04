@@ -44,8 +44,6 @@
 }
 
 h1:hover {
-    color: linear-gradient(#333 , #b9a811);
-    background-clip: text;
-    -webkit-background-clip: text;
-    color: transparent;
-    transition: color 2.3s ease;}
+    color: rgb(249, 248, 246);
+    transition: color 0.75s ease-in-out;
+}
