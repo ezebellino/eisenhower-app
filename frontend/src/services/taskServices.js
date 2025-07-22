@@ -36,3 +36,16 @@ export const getCompletedTasks = async () => {
   const res = await fetch(`${API_URL}/completed/`)
   return await res.json()
 }
+
+export const showOnlyCompletedActions = (task) => {
+  return task.is_completed ? {
+    onDelete: deleteTask,
+    onUncomplete: uncompleteTask,
+    showOnlyCompletedActions: true
+  } : {
+    onComplete: completeTask,
+    onDelete: deleteTask,
+    onUncomplete: uncompleteTask,
+    showOnlyCompletedActions: false
+  }
+}

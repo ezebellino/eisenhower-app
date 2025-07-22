@@ -6,6 +6,10 @@ import "../../styles/Card.css" // Asegúrate de tener este archivo CSS
 
 function Home() {
   const [tasks, setTasks] = useState([])
+  const [indexQ1, setIndexQ1] = useState(0);
+  const [indexQ2, setIndexQ2] = useState(0);
+  const [indexQ3, setIndexQ3] = useState(0);
+  const [indexQ4, setIndexQ4] = useState(0);
 
   const fetchTasks = () => {
     getAllTasks()
@@ -50,44 +54,114 @@ function Home() {
         {/* Cuadrante 1 */}
         <div className="cuadrante1 stack-container">
           <h3 style={{ textAlign: "center", marginBottom: "1rem" }}>🟥 Urgente e Importante</h3>
-          {cuadrante1.length === 0 ? <p>En este momento no hay tareas en este cuadrante</p> :
-            cuadrante1.map((task, index) => (
-              <Card
-                key={task.id}
-                task={task}
-                onComplete={() => handleComplete(task.id)}
-                onDelete={() => handleDelete(task.id)}
-                onUncomplete={() => handleUncomplete(task.id)}
-                index={index}
-              />
-            ))}
+          {cuadrante1.length === 0 ? (<p style={{ textAlign: "center" }}>En este momento no hay tareas en este cuadrante</p>
+          ) : ( 
+            <>
+                <Card
+                  key={cuadrante1[indexQ1].id}
+                  task={cuadrante1[indexQ1]}
+                  onComplete={() => handleComplete(cuadrante1[indexQ1].id)}
+                  onDelete={() => handleDelete(cuadrante1[indexQ1].id)}
+                  onUncomplete={() => handleUncomplete(cuadrante1[indexQ1].id)}
+                />
+                <div className="arrow-controls">
+                  <button
+                    onClick={() => setIndexQ1(prev => (prev > 0 ? prev - 1 : cuadrante1.length - 1))}
+                  >
+                    ⬅️
+                  </button>
+                  <button
+                    onClick={() => setIndexQ1(prev => (prev < cuadrante1.length - 1 ? prev + 1 : 0))}
+                  >
+                    ➡️
+                  </button>
+                </div>
+            </>
+            )}
         </div>
 
         {/* Cuadrante 2 */}
-        <div className="cuadrante2">
+        <div className="cuadrante2 stack-container">
           <h3 style={{ textAlign: "center", marginBottom: "1rem" }}>🟧 Urgente pero NO importante</h3>
-          {cuadrante2.length === 0 ? <p>En este momento no hay tareas en este cuadrante</p> :
-            cuadrante2.map(task => (
-              <Card key={task.id} task={task} onComplete={() => handleComplete(task.id)} onDelete={() => handleDelete(task.id)} onUncomplete={() => handleUncomplete(task.id)} />
-            ))}
+          {cuadrante2.length === 0 ? (<p style={{ textAlign: "center" }}>En este momento no hay tareas en este cuadrante</p>
+          ) : ( 
+            <>
+                <Card
+                  key={cuadrante2[indexQ2].id}
+                  task={cuadrante2[indexQ2]}
+                  onComplete={() => handleComplete(cuadrante2[indexQ2].id)}
+                  onDelete={() => handleDelete(cuadrante2[indexQ2].id)}
+                  onUncomplete={() => handleUncomplete(cuadrante2[indexQ2].id)}
+                />
+                <div className="arrow-controls">
+                  <button
+                    onClick={() => setIndexQ2(prev => (prev > 0 ? prev - 1 : cuadrante2.length - 1))}
+                  >
+                    ⬅️
+                  </button>
+                  <button
+                    onClick={() => setIndexQ2(prev => (prev < cuadrante2.length - 1 ? prev + 1 : 0))}
+                  >
+                    ➡️
+                  </button>
+                </div>
+            </>
+            )}
         </div>
 
         {/* Cuadrante 3 */}
         <div className="cuadrante3">
           <h3 style={{ textAlign: "center", marginBottom: "1rem" }}>🟦 Importante pero NO urgente</h3>
-          {cuadrante3.length === 0 ? <p>En este momento no hay tareas en este cuadrante</p> :
-            cuadrante3.map(task => (
-              <Card key={task.id} task={task} onComplete={() => handleComplete(task.id)} onDelete={() => handleDelete(task.id)} onUncomplete={() => handleUncomplete(task.id)} />
-            ))}
+          {cuadrante3.length === 0 ? <p style={{ textAlign: "center" }}>En este momento no hay tareas en este cuadrante</p> : ( 
+            <>
+                <Card
+                  key={cuadrante3[indexQ3].id}
+                  task={cuadrante3[indexQ3]}
+                  onComplete={() => handleComplete(cuadrante3[indexQ3].id)}
+                  onDelete={() => handleDelete(cuadrante3[indexQ3].id)}
+                  onUncomplete={() => handleUncomplete(cuadrante3[indexQ3].id)}
+                />
+                <div className="arrow-controls">
+                  <button
+                    onClick={() => setIndexQ3(prev => (prev > 0 ? prev - 1 : cuadrante3.length - 1))}
+                  >
+                    ⬅️
+                  </button>
+                  <button
+                    onClick={() => setIndexQ3(prev => (prev < cuadrante3.length - 1 ? prev + 1 : 0))}
+                  >
+                    ➡️
+                  </button>
+                </div>
+            </>
+            )}
         </div>
-
         {/* Cuadrante 4 */}
         <div className="cuadrante4">
           <h3 style={{ textAlign: "center", marginBottom: "1rem" }}>🟩 Ni urgente ni importante</h3>
-          {cuadrante4.length === 0 ? <p>En este momento no hay tareas en este cuadrante</p> :
-            cuadrante4.map(task => (
-              <Card key={task.id} task={task} onComplete={() => handleComplete(task.id)} onDelete={() => handleDelete(task.id)} onUncomplete={() => handleUncomplete(task.id)} />
-            ))}
+          {cuadrante4.length === 0 ? <p style={{ textAlign: "center" }}>En este momento no hay tareas en este cuadrante</p> : ( 
+            <>
+                <Card
+                  key={cuadrante4[indexQ4].id}
+                  task={cuadrante4[indexQ4]}
+                  onComplete={() => handleComplete(cuadrante4[indexQ4].id)}
+                  onDelete={() => handleDelete(cuadrante4[indexQ4].id)}
+                  onUncomplete={() => handleUncomplete(cuadrante4[indexQ4].id)}
+                />
+                <div className="arrow-controls">
+                  <button
+                    onClick={() => setIndexQ4(prev => (prev > 0 ? prev - 1 : cuadrante4.length - 1))}
+                  >
+                    ⬅️
+                  </button>
+                  <button
+                    onClick={() => setIndexQ4(prev => (prev < cuadrante4.length - 1 ? prev + 1 : 0))}
+                  >
+                    ➡️
+                  </button>
+                </div>
+            </>
+            )}
         </div>
       </div>
     </div>
