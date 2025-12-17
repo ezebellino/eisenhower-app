@@ -40,7 +40,7 @@
 }
 
 .cuadrante1:hover, .cuadrante2:hover, .cuadrante3:hover, .cuadrante4:hover {
-    transform: scale(1.025);
+    transform: scale(1.1);
 }
 
 h1:hover {
