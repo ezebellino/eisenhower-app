@@ -1,24 +1,22 @@
-import { Link } from "react-router-dom"
+import { Link } from "react-router-dom";
+import "../../styles/Navbar.css";
 
-function Navbar() {
+export default function Navbar() {
   return (
-    <nav style={{
-      padding: '1rem',
-      background: '#222',
-      color: '#fff',
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'center'
-    }}>
-      <div>
-        <Link to="/" style={{ marginRight: '1rem', color: '#fff' }}>Inicio</Link>
-        <Link to="/completed" style={{ marginRight: '1rem', color: '#fff' }}>Completadas</Link>
-      </div>
-      <Link to="/create" style={{ color: '#fff', backgroundColor: '#28a745', padding: '0.5rem 1rem', borderRadius: '5px', textDecoration: 'none' }}>
-        Crear Tarea
-      </Link>
-    </nav>
-  )
-}
+    <header className="navbar">
+      <div className="navbar__inner">
+        <div className="navbar__left">
+          <Link to="/" className="navbar__brand">Eisenhower</Link>
 
-export default Navbar
+          <nav className="navbar__links">
+            <Link to="/completed">Completadas</Link>
+          </nav>
+        </div>
+
+        <div className="navbar__right">
+          <Link to="/create" className="btn-primary">Crear tarea</Link>
+        </div>
+      </div>
+    </header>
+  );
+}

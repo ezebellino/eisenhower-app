@@ -35,10 +35,6 @@ export default function CreateTask() {
       newErrors.description = "La descripción debe tener al menos 5 caracteres";
     }
 
-    if (!formData.is_urgent && !formData.is_important) {
-      newErrors.general = "Seleccioná al menos 'Urgente' o 'Importante' (si no, queda en cuadrante 4).";
-    }
-
     return newErrors;
   };
 
@@ -66,75 +62,87 @@ export default function CreateTask() {
   };
 
   return (
-    <div
-      style={{
-        maxWidth: "500px",
-        margin: "auto",
-        padding: "1rem",
-        backgroundColor: "#f9f9f9",
-        borderRadius: "8px",
-      }}
-    >
-      <h2 id="create-task-title">Crear nueva tarea 📝</h2>
+    <div className="container">
+      <div className="form-page">
+        <div className="form-card">
+          <h2 id="create-task-title">Crear nueva tarea 📝</h2>
+          <p className="subtle form-subtitle">
+            Elegí si es urgente y/o importante para ubicarla en la matriz.
+          </p>
 
-      <form id="task-form" onSubmit={handleSubmit}>
-        <div>
-          <label className={errors.title ? "label-shake" : ""}>Título:</label>
-          <input
-            type="text"
-            name="title"
-            value={formData.title}
-            onChange={handleChange}
-            className={`form-input ${errors.title ? "input-error shake" : ""}`}
-          />
-          {errors.title && <p className="error fade-in">{errors.title}</p>}
+          <form id="task-form" onSubmit={handleSubmit}>
+            <div className="form-field">
+              <label className={errors.title ? "label-shake" : ""}>Título</label>
+              <input
+                type="text"
+                name="title"
+                value={formData.title}
+                onChange={handleChange}
+                className={`form-input ${errors.title ? "input-error shake" : ""}`}
+                placeholder="Ej: Llamar al médico"
+              />
+              {errors.title && <p className="error fade-in">{errors.title}</p>}
+            </div>
+
+            <div className="form-field">
+              <label className={errors.description ? "label-shake" : ""}>
+                Descripción
+              </label>
+              <textarea
+                name="description"
+                value={formData.description ?? ""}
+                onChange={handleChange}
+                className={`form-textarea ${errors.description ? "input-error shake" : ""}`}
+                placeholder="Contexto breve (opcional)"
+              />
+              {errors.description && (
+                <p className="error fade-in">{errors.description}</p>
+              )}
+            </div>
+
+            <div className="form-checks">
+              <label className="check">
+                <input
+                  type="checkbox"
+                  name="is_urgent"
+                  checked={formData.is_urgent}
+                  onChange={handleChange}
+                />
+                <span>Urgente</span>
+              </label>
+
+              <label className="check">
+                <input
+                  type="checkbox"
+                  name="is_important"
+                  checked={formData.is_important}
+                  onChange={handleChange}
+                />
+                <span>Importante</span>
+              </label>
+            </div>
+
+            {!formData.is_urgent && !formData.is_important && (
+              <p className="subtle form-hint fade-in">
+                Esta tarea se ubicará en el cuadrante <strong>“Ni urgente ni importante”</strong>.
+              </p>
+            )}
+
+
+            {errors.general && <p className="error fade-in">{errors.general}</p>}
+
+            <div className="form-actions">
+              <button type="button" className="btn-ghost" onClick={() => navigate(-1)}>
+                Volver
+              </button>
+
+              <button type="submit" className="btn-primary">
+                Crear tarea
+              </button>
+            </div>
+          </form>
         </div>
-
-        <div>
-          <label className={errors.description ? "label-shake" : ""}>
-            Descripción:
-          </label>
-          <textarea
-            name="description"
-            value={formData.description ?? ""}
-            onChange={handleChange}
-            className={`form-textarea ${
-              errors.description ? "input-error shake" : ""
-            }`}
-          />
-          {errors.description && (
-            <p className="error fade-in">{errors.description}</p>
-          )}
-        </div>
-
-        <div>
-          <label>
-            <input
-              type="checkbox"
-              name="is_urgent"
-              checked={formData.is_urgent}
-              onChange={handleChange}
-            />
-            Urgente
-          </label>
-        </div>
-
-        <div>
-          <label>
-            <input
-              type="checkbox"
-              name="is_important"
-              checked={formData.is_important}
-              onChange={handleChange}
-            />
-            Importante
-          </label>
-        </div>
-
-        {errors.general && <p className="error fade-in">{errors.general}</p>}
-
-        <button type="submit">Crear tarea</button>
-      </form>
+      </div>
     </div>
   );
 }
