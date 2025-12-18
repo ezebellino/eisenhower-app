@@ -1,49 +1,66 @@
-.cuadrante1 {
-    border: 8px solid black;
-    border-radius: 10px;
-    padding: 10px;
-    margin-bottom: 20px;
-    background: linear-gradient(#f0f0f0, #72a7b3);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    transition: transform 0.2s;
-    min-height: 400px;
-}
-.cuadrante2 {
-    border: 8px solid black;
-    border-radius: 10px;
-    padding: 10px;
-    min-height: 400px;
-    margin-bottom: 20px;
-    background: linear-gradient(#f0f0f0, #72a7b3);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    transition: transform 0.2s;
-}
-.cuadrante3 {
-    border: 8px solid black;
-    border-radius: 10px;
-    padding: 10px;
-    min-height: 400px;
-    margin-bottom: 20px;
-    background: linear-gradient(#f0f0f0, #72a7b3);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    transition: transform 0.2s;
-}
-.cuadrante4 {
-    border: 8px solid black;
-    border-radius: 10px;
-    padding: 10px;
-    min-height: 400px;
-    margin-bottom: 20px;
-    background: linear-gradient(#f0f0f0, #72a7b3);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    transition: transform 0.2s;
+.matrix {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--gap);
 }
 
-.cuadrante1:hover, .cuadrante2:hover, .cuadrante3:hover, .cuadrante4:hover {
-    transform: scale(1.1);
+.matrix--completed {
+  grid-template-rows: auto auto;
 }
 
-h1:hover {
-    color: rgb(249, 248, 246);
-    transition: color 0.75s ease-in-out;
+.matrix--completed .panel {
+  background: linear-gradient(
+    180deg,
+    rgba(47, 228, 171, 0.10),
+    rgba(255, 255, 255, 0.03)
+  );
+  border-left-color: rgba(47, 228, 171, 0.8);
+}
+
+.panel {
+  background: linear-gradient(180deg, var(--panel), rgba(255,255,255,0.03));
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px;
+  box-shadow: var(--shadow);
+  min-height: 220px;
+}
+
+.panel h3 {
+  margin: 0 0 12px 0;
+  font-size: 1rem;
+  color: var(--text);
+}
+
+.panel-empty {
+  color: var(--muted);
+  margin: 0;
+  padding: 12px 0;
+  text-align: center;
+}
+
+/* Quadrant accents */
+.q1 { border-left: 4px solid rgba(255,92,122,0.9); }
+.q2 { border-left: 4px solid rgba(255,170,80,0.9); }
+.q3 { border-left: 4px solid rgba(106,169,255,0.9); }
+.q4 { border-left: 4px solid rgba(47,228,171,0.9); }
+
+.arrow-controls {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.arrow-controls button {
+  flex: 1;
+  padding: 10px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.05);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.arrow-controls button:hover {
+  border-color: rgba(255,255,255,0.25);
 }

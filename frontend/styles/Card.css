@@ -1,94 +1,74 @@
 .card-3d {
-  background-color: white;
-    border: 2px solid goldenrod;
-  padding: 1.2rem;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  perspective: 1000px;
-  width: 100%;
-  max-width: 280px;
-  margin: auto;
-  text-align: center;
+  background: linear-gradient(180deg, var(--panel), rgba(255,255,255,0.03));
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 16px;
+  backdrop-filter: blur(10px);
 }
 
-.card-3d:hover {
-  transform: translateY(-5px) rotateX(4deg) rotateY(4deg);
-  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.25);
+.card-3d h3 {
+  margin: 0 0 8px 0;
+  font-size: 1.05rem;
+  letter-spacing: -0.01em;
 }
 
-/* Botones */
+.card-3d p {
+  margin: 6px 0;
+  color: var(--muted);
+  line-height: 1.4;
+
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+
+  /* Standard (future-proof) */
+  line-clamp: 3;
+
+  overflow: hidden;
+}
+
+
+
+.card-meta {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.06);
+  color: var(--text);
+  font-size: 0.82rem;
+}
+
+.badge-success { border-color: rgba(47,228,171,0.35); }
+.badge-danger  { border-color: rgba(255,92,122,0.35); }
+.badge-muted   { opacity: 0.9; }
+
 .btn-completar,
 .btn-revertir,
 .btn-eliminar {
-  margin: 0.5rem;
-  padding: 0.5rem;
-  font-size: 1rem;
-  font-weight: bold;
-  border-radius: 8px;
+  width: 100%;
+  margin-top: 10px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.06);
+  color: var(--text);
   cursor: pointer;
-  border: none;
-  transition: background-color 0.3s ease;
+  transition: transform 120ms ease, background 120ms ease, border-color 120ms ease;
 }
 
-.btn-completar {
-  background-color: #0bda51;
-  color: white;
-}
+.btn-completar:hover { transform: translateY(-1px); border-color: rgba(106,169,255,0.5); }
+.btn-revertir:hover  { transform: translateY(-1px); border-color: rgba(124,92,255,0.5); }
+.btn-eliminar:hover  { transform: translateY(-1px); border-color: rgba(255,92,122,0.55); }
 
-.btn-completar:hover {
-  background-color: #079c3d;
-}
-
-.btn-revertir {
-  background-color: orange;
-  color: white;
-}
-
-.btn-revertir:hover {
-  background-color: #ff8c00;
-  color: black;
-}
-
-.btn-eliminar {
-  background-color: red;
-  color: white;
-}
-
-.btn-eliminar:hover {
-  background-color: darkred;
-}
-
-/* Estilos para los cuadrantes */
-.stack-container {
-    position: relative;
-    height: 350px;
-    perspective: 1000px;
-}
-
-.card-stack {
-    position: relative;
-    width: 100%;
-    transition: transform 0.3s ease;
-}
-
-.arrow-controls {
-  display: flex;
-  justify-content: center;
-  margin-top: 0.5rem;
-  gap: 1rem;
-}
-
-.arrow-controls button {
-  background-color: #333;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  padding: 0.5rem 1rem;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
-
-.arrow-controls button:hover {
-  background-color: #555;
-}
+.card-stack { position: relative; }

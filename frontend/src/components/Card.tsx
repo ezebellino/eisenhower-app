@@ -53,13 +53,19 @@ export default function Card({
       <h3>{task.title}</h3>
       {task.description && <p>{task.description}</p>}
 
-      <p>
-        <strong>Cuadrante:</strong> {quadrantLabel(task.quadrant)}
-      </p>
+      <div className="card-meta">
+        <span className="badge badge-muted">
+          {quadrantLabel(task.quadrant)}
+        </span>
 
-      <p>
-        <strong>Estado:</strong> {isCompleted ? "✔️ Completada" : "❌ Pendiente"}
-      </p>
+        <span
+          className={`badge ${isCompleted ? "badge-success" : "badge-danger"
+            }`}
+        >
+          {isCompleted ? "✔️ Completada" : "⏳ Pendiente"}
+        </span>
+      </div>
+
 
       {!isCompleted && !showOnlyCompletedActions && onComplete && (
         <button onClick={() => onComplete(task.id)} className="btn-completar">
