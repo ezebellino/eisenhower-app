@@ -1,78 +1,84 @@
-# EisenhowerApp 🧠✅
+# EisenhowerApp 🧠
 
-Una aplicación web basada en la **Matriz de Eisenhower** para organizar tareas según su nivel de urgencia e importancia. Ideal para priorizar, mejorar tu productividad y no dejar nada pendiente.
+Aplicación web basada en la **Matriz de Eisenhower** para organizar tareas según su urgencia e importancia.  
+Permite priorizar de forma visual, clara y eficiente, separando tareas activas y completadas.
+
+---
+
+## ✨ Características principales
+
+- Creación de tareas con título, descripción y prioridad
+- Clasificación automática en los 4 cuadrantes de Eisenhower
+- Navegación por tareas mediante controles intuitivos (una tarjeta por cuadrante)
+- Vista separada para tareas activas y completadas
+- Posibilidad de completar, revertir o eliminar tareas
+- Animaciones suaves entre vistas y acciones (Framer Motion)
+- UI oscura moderna con sistema de temas centralizado
 
 ---
 
 ## 🛠️ Tecnologías utilizadas
 
-- **Frontend:** React + Vite
-- **Estilos:** CSS personalizado + Animaciones manuales
-- **Backend:** FastAPI (Python)
-- **Base de datos:** SQLite (puede escalarse a PostgreSQL)
-- **Consumo de API:** Fetch desde servicios externos en `taskServices.js`
+### Frontend
+- **React + Vite**
+- **TypeScript**
+- **React Router**
+- **Framer Motion**
+- CSS modular con variables de tema
+
+### Backend
+- **FastAPI (Python)**
+- **SQLAlchemy**
+- **SQLite** (escalable a PostgreSQL)
+
+### Arquitectura
+- Separación clara frontend / backend
+- Servicios desacoplados para consumo de API
+- Componentes reutilizables (EisenhowerMatrix, Card, Navbar)
 
 ---
 
-## ⚙️ Funcionalidades principales
-
-- Crear tareas con título, descripción y nivel de prioridad (`urgente` / `importante`)
-- Visualizar tareas divididas en 4 cuadrantes según la matriz de Eisenhower
-- Marcar tareas como completadas ✅
-- Revertir tareas finalizadas con un clic ⬅️
-- Eliminar tareas de forma permanente 🗑️
-- Animaciones visuales para validaciones y acciones del usuario
-- Navegación entre vista de tareas activas y completadas
-
----
-
-## 🚀 Cómo iniciar el proyecto localmente
+## 🚀 Instalación y ejecución local
 
 ### 1. Clonar el repositorio
-
 ```bash
 git clone https://github.com/ezebellino/eisenhowerapp.git
 cd eisenhowerapp
 ```
 
-### 2. Instalar dependencias del frontend
-
+### 2. Frontend
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
 
-### 3. Ejecutar el backend (FastAPI)
-
-En otra terminal:
-
+### 3. Backend
 ```bash
 cd backend
 uvicorn main:app --reload
 ```
 
-> Asegurate de tener instalado `uvicorn`, `fastapi`, `sqlalchemy`, etc.
+## 📱 Responsive design
+La aplicación está adaptada para dispositivos móviles:
+    - **En pantallas pequeñas, los cuadrantes se muestran en columna**
+    - **El orden sigue la prioridad:**
+    - *Urgente & Importante -> Importante -> Urgente -> Ni Urgente, ni Importante*
 
----
+## 🧭 Roadmap / Próximas mejoras
 
-## 🧪 Próximas mejoras
+    - Drag & Drop entre cuadrantes
 
-- Efecto 3D con cartas apiladas
-- Arrastrar y soltar (Drag & Drop)
-- Filtros por fecha y búsqueda
-- Soporte multiusuario con autenticación
-- Persistencia en la nube (PostgreSQL o Supabase)
+    - Filtros por fecha y búsqueda
 
----
+    - Soporte multiusuario con autenticación y rol
+
+    - Persistencia en la nube (PostgreSQL / Supabase)
+
+    - Atajos de teclado y mejoras de accesibilidad
 
 ## 👨‍💻 Autor
+**Ezequiel Bellino**
+Github:[www.github.com/ezebellino]
 
-**Ezequiel Bellino** — [GitHub](https://github.com/ezebellino)  
-Proyecto desarrollado como parte de mi portfolio profesional de desarrollador FullStack.
-
----
-
-## 📸 Vista previa
-
-> *(Próximamente: captura de pantalla del dashboard con las tareas activas y completadas)*
+Proyecto desarrollado como parte de mi portfolio profesional FullStack.
