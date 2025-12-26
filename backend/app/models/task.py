@@ -1,7 +1,7 @@
 from datetime import datetime
 
-from sqlalchemy import Boolean, DateTime, Integer, String, func
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String, func
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
 
@@ -17,6 +17,14 @@ class Task(Base):
     is_urgent: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     is_important: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     completed: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+
+    assigned_to_id: Mapped[int | None] = mapped_column(
+        ForeignKey("users.id"),
+        nullable=True,
+        index=True,
+    )
+
+    assigned_to = relationship("User")
 
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),

@@ -1,23 +1,30 @@
 from fastapi import FastAPI
-from app.database import Base, engine
-from app.routes import tasks
 from fastapi.middleware.cors import CORSMiddleware
 
-# Create the FastAPI app
-app = FastAPI()
+from app.database import Base, engine
+from app.routes.auth import router as auth_router
+from app.routes.tasks import router as tasks_router
+from app.routes.users import router as user_router  # Asegura que el modelo User esté registrado
 
-# Add CORS middleware to allow requests from any origin
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["http://localhost:5173"],  # Allow all origins
-    allow_credentials=True,
-    allow_methods=["*"],  # Allow all methods
-    allow_headers=["*"],  # Allow all headers
-)
 
-Base.metadata.create_all(bind=engine)
+def create_app() -> FastAPI:
+    app = FastAPI(title="Eisenhower API")
 
-# Include the tasks router
-app.include_router(tasks.router)
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["http://localhost:5173"],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
 
-# Create the database tables
+    Base.metadata.create_all(bind=engine)
+
+    app.include_router(auth_router)
+    app.include_router(tasks_router)
+    app.include_router(user_router)
+
+    return app
+
+
+app = create_app()

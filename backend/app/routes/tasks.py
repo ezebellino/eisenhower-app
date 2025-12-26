@@ -1,119 +1,170 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Response, status
 from sqlalchemy.orm import Session
-from typing import Literal
-from app.database import SessionLocal
-from app import schemas
-from app.models.task import Task  # ✅ modelo ORM
+
+from app.deps import get_db, get_current_user
+from app.models.task import Task
+from app.models.user import User
+from app.schemas.task import TaskCreate, TaskOut, TaskUpdate
+
 
 router = APIRouter(prefix="/tasks", tags=["tasks"])
 
 
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+@router.post("/", response_model=TaskOut)
+def create_task(
+    payload: TaskCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    assigned_to_id = payload.assigned_to_id
 
+    # Si NO es supervisor, fuerza asignación al usuario logueado
+    if current_user.role != "supervisor":
+        assigned_to_id = current_user.id
 
-@router.post("/", response_model=schemas.TaskOut)
-def create_task(payload: schemas.TaskCreate, db: Session = Depends(get_db)):
-    # ✅ instanciamos el ORM Task, no el Pydantic
-    db_task = Task(**payload.model_dump())
+    db_task = Task(
+        title=payload.title,
+        description=payload.description,
+        is_urgent=payload.is_urgent,
+        is_important=payload.is_important,
+        completed=False,
+        assigned_to_id=assigned_to_id,
+    )
     db.add(db_task)
     db.commit()
     db.refresh(db_task)
     return db_task
 
 
-@router.get("/", response_model=list[schemas.TaskOut])
-def read_all_tasks(db: Session = Depends(get_db)):
-    return db.query(Task).all()
+@router.get("/", response_model=list[TaskOut])
+def list_tasks(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    # supervisor ve todo; user ve solo lo suyo
+    q = db.query(Task)
+    if current_user.role != "supervisor":
+        q = q.filter(Task.assigned_to_id == current_user.id)
+    return q.all()
 
 
-@router.get("/{task_id}", response_model=schemas.TaskOut)
-def read_task(task_id: int, db: Session = Depends(get_db)):
-    db_task = db.query(Task).filter(Task.id == task_id).first()
-    if db_task is None:
-        raise HTTPException(status_code=404, detail="Task not found")
-    return db_task
+@router.get("/mine", response_model=list[TaskOut])
+def my_tasks(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    return db.query(Task).filter(Task.assigned_to_id == current_user.id).all()
 
 
-@router.put("/{task_id}", response_model=schemas.TaskOut)
-def update_task(task_id: int, payload: schemas.TaskUpdate, db: Session = Depends(get_db)):
-    db_task = db.get(Task, task_id)
-    if not db_task:
-        raise HTTPException(status_code=404, detail="Task not found")
-
-    task_data = payload.model_dump(exclude_unset=True)
-
-    for key, value in task_data.items():
-        setattr(db_task, key, value)
-
-    db.commit()
-    db.refresh(db_task)
-    return db_task
-
-
-@router.delete("/{task_id}", response_model=schemas.TaskOut)
-def delete_task(task_id: int, db: Session = Depends(get_db)):
-    db_task = db.get(Task, task_id)
-    if not db_task:
-        raise HTTPException(status_code=404, detail="Task not found")
-
-    db.delete(db_task)
-    db.commit()
-    return db_task
-
-
-@router.get("/filter/", response_model=list[schemas.TaskOut])
+@router.get("/filter/", response_model=list[TaskOut])
 def filter_tasks(
+    assigned_to_id: int | None = None,
+    completed: bool | None = None,
     is_urgent: bool | None = None,
     is_important: bool | None = None,
-    completed: bool | None = None,
     db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ):
-    query = db.query(Task)
+    q = db.query(Task)
 
-    if is_urgent is not None:
-        query = query.filter(Task.is_urgent == is_urgent)
-    if is_important is not None:
-        query = query.filter(Task.is_important == is_important)
+    # ACL: si no es supervisor, no puede filtrar por otros usuarios
+    if current_user.role != "supervisor":
+        q = q.filter(Task.assigned_to_id == current_user.id)
+    else:
+        if assigned_to_id is not None:
+            q = q.filter(Task.assigned_to_id == assigned_to_id)
+
     if completed is not None:
-        query = query.filter(Task.completed == completed)
+        q = q.filter(Task.completed == completed)
+    if is_urgent is not None:
+        q = q.filter(Task.is_urgent == is_urgent)
+    if is_important is not None:
+        q = q.filter(Task.is_important == is_important)
 
-    return query.all()
+    return q.all()
 
 
-@router.patch("/{task_id}/complete", response_model=schemas.TaskOut)
-def complete_task(task_id: int, db: Session = Depends(get_db)):
-    db_task = db.get(Task, task_id)
-    if not db_task:
+@router.put("/{task_id}", response_model=TaskOut)
+def update_task(
+    task_id: int,
+    payload: TaskUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    task = db.get(Task, task_id)
+    if not task:
         raise HTTPException(status_code=404, detail="Task not found")
 
-    db_task.completed = True
+    # ACL: user solo edita lo suyo
+    if current_user.role != "supervisor" and task.assigned_to_id != current_user.id:
+        raise HTTPException(status_code=403, detail="No autorizado")
+
+    data = payload.model_dump(exclude_unset=True)
+
+    # si no es supervisor, no puede reasignar
+    if current_user.role != "supervisor":
+        data.pop("assigned_to_id", None)
+
+    for k, v in data.items():
+        setattr(task, k, v)
+
     db.commit()
-    db.refresh(db_task)
-    return db_task
+    db.refresh(task)
+    return task
 
 
-@router.patch("/{task_id}/uncomplete", response_model=schemas.TaskOut)
-def uncomplete_task(task_id: int, db: Session = Depends(get_db)):
-    db_task = db.get(Task, task_id)
-    if not db_task:
+@router.patch("/{task_id}/complete", response_model=TaskOut)
+def complete_task(
+    task_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    task = db.get(Task, task_id)
+    if not task:
         raise HTTPException(status_code=404, detail="Task not found")
 
-    db_task.completed = False
+    if current_user.role != "supervisor" and task.assigned_to_id != current_user.id:
+        raise HTTPException(status_code=403, detail="No autorizado")
+
+    task.completed = True
     db.commit()
-    db.refresh(db_task)
-    return db_task
+    db.refresh(task)
+    return task
 
 
-@router.get("/completed/", response_model=list[schemas.TaskOut])
-def get_completed_tasks(db: Session = Depends(get_db)):
-    return db.query(Task).filter(Task.completed.is_(True)).all()
+@router.patch("/{task_id}/uncomplete", response_model=TaskOut)
+def uncomplete_task(
+    task_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    task = db.get(Task, task_id)
+    if not task:
+        raise HTTPException(status_code=404, detail="Task not found")
+
+    if current_user.role != "supervisor" and task.assigned_to_id != current_user.id:
+        raise HTTPException(status_code=403, detail="No autorizado")
+
+    task.completed = False
+    db.commit()
+    db.refresh(task)
+    return task
 
 
-@router.get("/pending/", response_model=list[schemas.TaskOut])
-def get_pending_tasks(db: Session = Depends(get_db)):
-    return db.query(Task).filter(Task.completed.is_(False)).all()
+@router.delete("/{task_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_task(
+    task_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    task = db.get(Task, task_id)
+    if not task:
+        raise HTTPException(status_code=404, detail="Task not found")
+
+    if current_user.role != "supervisor" and task.assigned_to_id != current_user.id:
+        raise HTTPException(status_code=403, detail="No autorizado")
+
+    db.delete(task)
+    db.commit()
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
+
