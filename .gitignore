@@ -56,3 +56,9 @@ pnpm-debug.log*
 # MISC
 # -------------------------------
 *.log
+
+
+# -------------------------------
+# Ignore seed files in backend/scripts
+# -------------------------------
+backend/app/scripts/
