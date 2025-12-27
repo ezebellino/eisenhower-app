@@ -21,11 +21,15 @@ export interface ApiTask {
 
 /**
  * UI model: lo que usa tu frontend internamente
+ * Nota: preservamos is_urgent/is_important para edición y creación.
  */
 export interface Task {
   id: TaskID;
   title: string;
   description?: string;
+
+  is_urgent: boolean;
+  is_important: boolean;
 
   quadrant: Quadrant;
   status: TaskStatus;
@@ -36,10 +40,6 @@ export interface Task {
 
 /**
  * Derivar cuadrante en base a urgente/importante
- * Q1: urgente + importante
- * Q2: no urgente + importante
- * Q3: urgente + no importante
- * Q4: no urgente + no importante
  */
 export const toQuadrant = (t: Pick<ApiTask, "is_urgent" | "is_important">): Quadrant => {
   if (t.is_urgent && t.is_important) return 1;
@@ -48,10 +48,31 @@ export const toQuadrant = (t: Pick<ApiTask, "is_urgent" | "is_important">): Quad
   return 4;
 };
 
+/**
+ * (Opcional) Derivar urgente/importante desde quadrant
+ * Útil si alguna vez necesitás recalcularlo desde UI.
+ */
+export const toUrgentImportant = (q: Quadrant): { is_urgent: boolean; is_important: boolean } => {
+  switch (q) {
+    case 1:
+      return { is_urgent: true, is_important: true };
+    case 2:
+      return { is_urgent: false, is_important: true };
+    case 3:
+      return { is_urgent: true, is_important: false };
+    case 4:
+    default:
+      return { is_urgent: false, is_important: false };
+  }
+};
+
 export const fromApiTask = (t: ApiTask): Task => ({
   id: t.id,
   title: t.title,
   description: t.description ?? undefined,
+
+  is_urgent: t.is_urgent,
+  is_important: t.is_important,
 
   quadrant: toQuadrant(t),
   status: t.completed ? "completed" : "active",

@@ -17,14 +17,18 @@
   /* State */
   --danger: #ff5c7a;
   --success: #2fe4ab;
-
+  --warning: #ffc34d;
+  --info: #5ad1ff;
+  
   /* Shadows / radius */
-  --radius: 16px;
-  --radius-sm: 12px;
+  --radius: 1rem;
+  --radius-sm: 0.75rem;
   --shadow: 0 10px 35px rgba(0,0,0,0.35);
 
   /* Spacing */
-  --gap: 16px;
+  --gap: 1rem;
+
+  --nav-h: 76px;
 }
 
 * { box-sizing: border-box; }
@@ -42,14 +46,15 @@ html, body {
 a { color: inherit; text-decoration: none; }
 
 .container {
-  max-width: 1100px;
+  width: 100%;
+  max-width: 75rem;
   margin: 0 auto;
-  padding: 24px;
+  padding-inline: 5%;
 }
 
 .page-title {
   font-size: 2rem;
-  margin: 0 0 18px 0;
+  margin: 10% 0 18px 0;
   letter-spacing: -0.02em;
 }
 
@@ -63,7 +68,9 @@ a { color: inherit; text-decoration: none; }
 
 .route-stage {
   position: relative;
-  min-height: calc(100vh - 64px); /* ajusta 64px si tu navbar mide distinto */
+  min-height: 100vh;
+  padding-top: 8vh;
+  padding-bottom: 8vh;
 }
 
 .route-screen {
@@ -72,9 +79,26 @@ a { color: inherit; text-decoration: none; }
   width: 100%;
 }
 
+.page {
+  padding-top: calc(var(--nav-h) - 10px);
+}
+
+
+html {
+  font-size: 100%; /* 16px por defecto */
+}
 
 @media (max-width: 768px) {
+  html {
+    font-size: 93.75%; /* ~15px */
+  }
   .matrix {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  html {
+    font-size: 87.5%; /* ~14px */
   }
 }

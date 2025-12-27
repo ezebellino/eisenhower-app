@@ -1,0 +1,111 @@
+/* -------------------------------
+   Auth (Login)
+-------------------------------- */
+
+  /* cambiar px por rem */ 
+.auth-page {
+  min-height: calc(100vh - 76px); /* si tu navbar mide ~76px */
+  display: grid;
+  place-items: center;
+  padding: 28px 18px;
+
+  /* sutil spotlight */
+  background:
+    radial-gradient(900px 420px at 50% 10%, rgba(106, 169, 255, 0.14), transparent 60%),
+    radial-gradient(700px 380px at 80% 30%, rgba(255, 92, 147, 0.10), transparent 60%),
+    radial-gradient(700px 380px at 20% 35%, rgba(44, 213, 196, 0.10), transparent 60%);
+}
+
+.auth-card {
+  width: min(520px, 100%);
+  padding: 18px;
+  border-radius: 18px;
+}
+
+.auth-header {
+  margin-bottom: 14px;
+}
+
+.auth-title {
+  margin: 0;
+  font-size: 34px;
+  letter-spacing: -0.02em;
+}
+
+.auth-subtitle {
+  margin: 6px 0 0;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.auth-form {
+  display: grid;
+  gap: 8px;
+}
+
+.auth-label {
+  color: var(--text);
+  font-weight: 600;
+  font-size: 0.95rem;
+  opacity: 0.95;
+}
+
+.auth-input {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  color: var(--text);
+  border-radius: 14px;
+  padding: 12px 14px;
+  outline: none;
+  transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease;
+}
+
+.auth-input::placeholder {
+  color: rgba(255, 255, 255, 0.35);
+}
+
+.auth-input:focus {
+  border-color: rgba(106, 169, 255, 0.55);
+  box-shadow: 0 0 0 4px rgba(106, 169, 255, 0.12);
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.auth-error {
+  margin: 8px 0 0;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: rgba(255, 92, 147, 0.10);
+  border: 1px solid rgba(255, 92, 147, 0.22);
+  color: var(--text);
+}
+
+.auth-submit {
+  margin-top: 12px;
+  width: 100%;
+  border-radius: 14px;
+  padding: 12px 14px;
+}
+.auth-submit:hover {
+  background: rgba(106, 169, 255, 0.12);
+}
+
+.auth-form-footer {
+  margin-top: 18px;
+  text-align: center;
+  font-size: 0.95rem;
+  color: var(--muted);
+  display: flex;
+  justify-content: space-between;
+}
+
+.auth-form-footer button {
+  color: var(--text);
+  font-weight: 600;
+  text-decoration: underline;
+  cursor: pointer;
+  background: none;
+  width: auto;
+  border: none;
+  padding: 0;   
+}
+

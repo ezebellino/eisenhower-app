@@ -64,3 +64,8 @@
 .arrow-controls button:hover {
   border-color: rgba(255,255,255,0.25);
 }
+
+.arrow-controls button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
