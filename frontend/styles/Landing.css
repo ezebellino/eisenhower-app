@@ -1,0 +1,79 @@
+.landing {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 48px 20px;
+}
+
+.landing__title {
+  font-size: 44px;
+  letter-spacing: 0.5px;
+  margin: 10% 0 18px 0;
+}
+
+.landing__typing {
+  font-size: 18px;
+  opacity: 0.9;
+  margin: 0 0 24px 0;
+  white-space: nowrap;
+  overflow: hidden;
+  border-right: 2px solid rgba(255,255,255,0.6);
+  width: 0;
+  animation: typing 2.2s steps(60, end) forwards, caret 700ms steps(1) infinite;
+}
+
+@keyframes typing {
+  to { width: 66.5%; }
+}
+
+@keyframes caret {
+  50% { border-color: transparent; }
+}
+
+.landing__actions {
+  display: flex;
+  gap: 12px;
+  margin: 18px 0 26px;
+  flex-wrap: wrap;
+}
+
+.btn-primary {
+  display: inline-block;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: rgba(106, 169, 255, 0.15);
+  border: 1px solid rgba(106, 169, 255, 0.30);
+  text-decoration: none;
+  color: var(--text);
+  font-weight: 600;
+}
+
+.btn-primary:hover {
+  background: rgba(106, 169, 255, 0.25);
+  border-color: rgba(106, 169, 255, 0.45);
+  color:rgba(106, 169, 255, 0.15) to var(--text);
+}
+
+.btn-secondary {
+  display: inline-block;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.18);
+  text-decoration: none;
+  color: var(--text);
+  font-weight: 600;
+}
+
+.btn-secondary:hover {
+  background: rgba(255,255,255,0.05);
+  border-color: rgba(255,255,255,0.25);
+  color: var(--text);
+}
+
+.landing__note {
+  margin-top: 18px;
+  padding: 14px 14px;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.10);
+}
+

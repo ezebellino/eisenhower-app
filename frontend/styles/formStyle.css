@@ -1,7 +1,8 @@
+
 .form-page {
   display: flex;
   justify-content: center;
-  padding: 10px 0 30px;
+  padding: 10%;
 }
 
 .form-card {
@@ -34,9 +35,9 @@
 .form-input,
 .form-textarea {
   width: 100%;
-  padding: 12px 12px;
+  padding: 0.75rem 1rem;
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: 0.875rem;
   font-size: 1rem;
   background: rgba(255,255,255,0.05);
   color: var(--text);
