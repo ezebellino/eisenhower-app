@@ -106,6 +106,77 @@ select.form-input option {
   accent-color: var(--accent);
 }
 
+.assignment-modes {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.65rem;
+  margin-bottom: 0.8rem;
+}
+
+.assignment-mode {
+  min-height: 2.9rem;
+  padding: 0.75rem 0.9rem;
+  border-radius: 0.9rem;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.04);
+  color: var(--text);
+  transition: transform 120ms ease, border-color 120ms ease, background 120ms ease;
+}
+
+.assignment-mode:hover:not(:disabled) {
+  transform: translateY(-1px);
+  border-color: rgba(255,255,255,0.22);
+  background: rgba(255,255,255,0.06);
+}
+
+.assignment-mode.is-active {
+  border-color: rgba(106,169,255,0.45);
+  background: rgba(106,169,255,0.12);
+  box-shadow: 0 0 0 3px rgba(106,169,255,0.1);
+}
+
+.assignment-mode:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.staff-selector {
+  display: grid;
+  gap: 0.6rem;
+  padding: 0.85rem;
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  background: rgba(255,255,255,0.04);
+}
+
+.staff-selector__item {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.7rem 0.8rem;
+  border-radius: 0.85rem;
+  background: rgba(7,17,31,0.42);
+  cursor: pointer;
+}
+
+.staff-selector__item input[type="checkbox"] {
+  accent-color: var(--accent);
+}
+
+.assignment-summary {
+  display: grid;
+  gap: 0.35rem;
+  padding: 0.95rem 1rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(106,169,255,0.22);
+  background: rgba(106,169,255,0.08);
+}
+
+.assignment-summary p {
+  margin: 0;
+  color: var(--muted-strong);
+}
+
 .form-actions {
   display: flex;
   justify-content: space-between;
@@ -154,6 +225,10 @@ select.form-input option {
 
   .form-checks,
   .form-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .assignment-modes {
     grid-template-columns: 1fr;
   }
 

@@ -64,6 +64,7 @@ export default function Home() {
   const [quadrantFilter, setQuadrantFilter] = useState<QuadrantFilter>("all");
   const [sortBy, setSortBy] = useState<SortOption>("recent");
   const [supervisorScope, setSupervisorScope] = useState<SupervisorScope>("all");
+  const [focusedAssigneeId, setFocusedAssigneeId] = useState<number | null>(null);
   const deferredSearch = useDeferredValue(searchTerm);
   const { user } = useAuth();
   const [indexQ1, setIndexQ1] = useState(0);
@@ -245,8 +246,10 @@ export default function Home() {
     const query = deferredSearch.trim().toLocaleLowerCase("es");
 
     const filtered = activeTasks.filter((task) => {
+      const matchesFocusedAssignee =
+        focusedAssigneeId == null ? true : task.assigned_to_id === focusedAssigneeId;
       const matchesScope =
-        user?.role !== "supervisor"
+        user?.role !== "supervisor" || focusedAssigneeId != null
           ? true
           : supervisorScope === "all"
             ? true
@@ -262,15 +265,49 @@ export default function Home() {
           ? true
           : `${task.title} ${task.description ?? ""}`.toLocaleLowerCase("es").includes(query);
 
-      return matchesScope && matchesQuadrant && matchesSearch;
+      return matchesFocusedAssignee && matchesScope && matchesQuadrant && matchesSearch;
     });
 
     return sortTasks(filtered, sortBy);
-  }, [activeTasks, deferredSearch, quadrantFilter, sortBy, supervisorScope, user]);
+  }, [activeTasks, deferredSearch, focusedAssigneeId, quadrantFilter, sortBy, supervisorScope, user]);
 
   const assigneeLookup = useMemo(
     () => new Map(staffUsers.map((staffUser) => [staffUser.id, staffUser.username])),
     [staffUsers]
+  );
+
+  const teamLoad = useMemo(() => {
+    if (user?.role !== "supervisor") return [];
+
+    return staffUsers
+      .filter((staffUser) => staffUser.is_active)
+      .map((staffUser) => {
+        const assigned = activeTasks.filter((task) => task.assigned_to_id === staffUser.id);
+        const q1 = assigned.filter((task) => task.quadrant === 1).length;
+        const important = assigned.filter((task) => task.is_important).length;
+
+        return {
+          id: staffUser.id,
+          username: staffUser.username,
+          role: staffUser.role,
+          total: assigned.length,
+          q1,
+          focus: assigned.length === 0 ? 0 : Math.round((important / assigned.length) * 100),
+        };
+      })
+      .sort((left, right) => {
+        if (right.q1 !== left.q1) return right.q1 - left.q1;
+        return right.total - left.total;
+      });
+  }, [activeTasks, staffUsers, user]);
+
+  const unassignedQueue = useMemo(
+    () =>
+      sortTasks(
+        activeTasks.filter((task) => task.assigned_to_id == null),
+        "recent"
+      ).slice(0, 3),
+    [activeTasks]
   );
 
   const resolveAssigneeLabel = (task: Task) => {
@@ -278,6 +315,10 @@ export default function Home() {
     if (user && task.assigned_to_id === user.id) return "Asignada a vos";
     return assigneeLookup.get(task.assigned_to_id) ?? `Usuario #${task.assigned_to_id}`;
   };
+
+  const focusedAssignee = focusedAssigneeId == null
+    ? null
+    : teamLoad.find((member) => member.id === focusedAssigneeId) ?? null;
 
   return (
     <div className="page container">
@@ -320,6 +361,128 @@ export default function Home() {
                   </article>
                 ))}
               </div>
+
+              {user?.role === "supervisor" && (
+                <div className="supervisor-overview">
+                  <div className="team-load panel">
+                    <div className="team-load__header">
+                      <div>
+                        <p className="team-load__eyebrow">Carga del equipo</p>
+                        <h3>Distribucion actual por persona</h3>
+                      </div>
+                      <small>
+                        {teamLoad.length === 0
+                          ? "Todavia no hay staff cargado para mostrar."
+                          : "Ordenado por urgencia Q1 y volumen total de trabajo."}
+                      </small>
+                    </div>
+
+                    <div className="team-load__grid">
+                      {teamLoad.map((member) => (
+                        <button
+                          key={member.id}
+                          type="button"
+                          className={`team-load__card ${focusedAssigneeId === member.id ? "is-active" : ""}`}
+                          onClick={() => {
+                            setFocusedAssigneeId(member.id);
+                            setSupervisorScope("all");
+                          }}
+                        >
+                          <div className="team-load__title">
+                            <strong>{member.username}</strong>
+                            {member.role === "supervisor" && <span>Supervisor</span>}
+                          </div>
+
+                          <div className="team-load__stats">
+                            <div>
+                              <span>Activas</span>
+                              <strong>{member.total}</strong>
+                            </div>
+                            <div>
+                              <span>Q1</span>
+                              <strong>{member.q1}</strong>
+                            </div>
+                            <div>
+                              <span>Foco</span>
+                              <strong>{member.focus}%</strong>
+                            </div>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <aside className="unassigned-queue panel">
+                    <div className="unassigned-queue__header">
+                      <div>
+                        <p className="team-load__eyebrow">Bandeja sin asignar</p>
+                        <h3>Tareas esperando responsable</h3>
+                      </div>
+                      <span className="unassigned-queue__count">{unassignedTasks}</span>
+                    </div>
+
+                    <p className="unassigned-queue__summary">
+                      {unassignedTasks === 0
+                        ? "No hay tareas sueltas ahora mismo. Buena senal de control operativo."
+                        : "Prioriza esta bandeja para que nada importante quede sin dueno."}
+                    </p>
+
+                    {unassignedQueue.length > 0 ? (
+                      <div className="unassigned-queue__list">
+                        {unassignedQueue.map((task) => (
+                          <button
+                            key={task.id}
+                            type="button"
+                            className="unassigned-queue__item"
+                            onClick={() => {
+                              setFocusedAssigneeId(null);
+                              setSupervisorScope("unassigned");
+                              setQuadrantFilter("all");
+                              setSearchTerm(task.title);
+                            }}
+                          >
+                            <div>
+                              <strong>{task.title}</strong>
+                              <small>
+                                {task.quadrant === 1
+                                  ? "Urgente e importante"
+                                  : task.quadrant === 2
+                                    ? "Importante, no urgente"
+                                    : task.quadrant === 3
+                                      ? "Urgente, no importante"
+                                      : "Ni urgente ni importante"}
+                              </small>
+                            </div>
+                            <span>Ver</span>
+                          </button>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="unassigned-queue__empty">
+                        <strong>Todo tiene responsable.</strong>
+                        <p>Segui creando y delegando desde el dashboard cuando haga falta.</p>
+                      </div>
+                    )}
+
+                    <div className="unassigned-queue__actions">
+                      <button
+                        type="button"
+                        className="btn-primary"
+                        onClick={() => {
+                          setFocusedAssigneeId(null);
+                          setSupervisorScope("unassigned");
+                          setSearchTerm("");
+                        }}
+                      >
+                        Abrir vista sin asignar
+                      </button>
+                      <Link to="/tasks/create" className="btn-ghost">
+                        Crear tarea
+                      </Link>
+                    </div>
+                  </aside>
+                </div>
+              )}
             </div>
 
             {sessionNotice && (
@@ -384,12 +547,25 @@ export default function Home() {
               />
             </div>
 
+            {focusedAssignee && (
+              <div className="matrix-filter matrix-filter--focus">
+                <span>Persona enfocada</span>
+                <div className="matrix-filter__focus">
+                  <strong>{focusedAssignee.username}</strong>
+                  <button type="button" className="btn-ghost" onClick={() => setFocusedAssigneeId(null)}>
+                    Limpiar
+                  </button>
+                </div>
+              </div>
+            )}
+
             {user?.role === "supervisor" && (
               <div className="matrix-filter">
                 <span>Vista</span>
                 <select
                   value={supervisorScope}
                   onChange={(event) => setSupervisorScope(event.target.value as SupervisorScope)}
+                  disabled={focusedAssigneeId != null}
                 >
                   <option value="all">Todas</option>
                   <option value="mine">Asignadas a vos</option>
