@@ -3,11 +3,19 @@ import { Link } from "react-router-dom";
 import EisenhowerMatrix from "../components/EisenhowerMatrix";
 import {
   confirmDestructiveAction,
+  selectDuplicationTargets,
   showErrorAlert,
+  showInfoAlert,
   showSuccessToast,
 } from "../services/alertService";
 import { consumeSessionNotice } from "../services/sessionNoticeService";
-import { completeTask, deleteTask, getAllTasks, uncompleteTask } from "../services/taskServices";
+import {
+  completeTask,
+  createTask,
+  deleteTask,
+  getAllTasks,
+  uncompleteTask,
+} from "../services/taskServices";
 import type { Task, TaskID } from "../types/tasks";
 import { useAuth } from "../auth/AuthContext";
 import { listUsers, type UserSummary } from "../services/userService";
@@ -147,6 +155,57 @@ export default function Home() {
       await showSuccessToast("Tarea reabierta");
     } catch (error: any) {
       await showErrorAlert("No pudimos reabrir la tarea", error?.message ?? "Intenta otra vez.");
+    }
+  };
+
+  const handleDuplicateTask = async (task: Task) => {
+    if (user?.role !== "supervisor") return;
+
+    const eligibleUsers = staffUsers.filter(
+      (staffUser) => staffUser.is_active && staffUser.id !== task.assigned_to_id
+    );
+
+    if (eligibleUsers.length === 0) {
+      await showInfoAlert(
+        "No hay destinatarios disponibles",
+        "No encontramos otras personas activas para duplicar esta tarea."
+      );
+      return;
+    }
+
+    const currentAssigneeLabel =
+      task.assigned_to_id == null
+        ? "Sin asignar"
+        : assigneeLookup.get(task.assigned_to_id) ?? `Usuario #${task.assigned_to_id}`;
+
+    const targetSelection = await selectDuplicationTargets(eligibleUsers, currentAssigneeLabel);
+    if (!targetSelection) return;
+
+    const targetIds =
+      targetSelection === "all" ? eligibleUsers.map((staffUser) => staffUser.id) : targetSelection;
+
+    try {
+      for (const targetId of targetIds) {
+        await createTask({
+          title: task.title,
+          description: task.description ?? "",
+          is_urgent: task.is_urgent,
+          is_important: task.is_important,
+          assigned_to_id: targetId,
+        });
+      }
+
+      await fetchTasks();
+      await showSuccessToast(
+        targetIds.length > 1
+          ? `${targetIds.length} copias creadas correctamente`
+          : "Copia creada correctamente"
+      );
+    } catch (error: any) {
+      await showErrorAlert(
+        "No pudimos duplicar la tarea",
+        error?.message ?? "Intenta otra vez."
+      );
     }
   };
 
@@ -610,6 +669,7 @@ export default function Home() {
         mode="active"
         onComplete={handleComplete}
         onDelete={handleDelete}
+        onDuplicate={user?.role === "supervisor" ? handleDuplicateTask : undefined}
         onUncomplete={handleUncomplete}
         indexQ1={indexQ1}
         indexQ2={indexQ2}
