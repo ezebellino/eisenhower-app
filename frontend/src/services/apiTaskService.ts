@@ -9,7 +9,9 @@ export type CreateTaskPayload = {
   is_important: boolean;
   scheduled_for?: string | null;
   scheduled_time?: string | null;
-  recurrence?: "daily" | "weekly" | "monthly" | null;
+  scheduled_time_end?: string | null;
+  recurrence?: "daily" | "weekly" | "monthly" | "weekdays" | null;
+  exclude_holidays?: boolean | null;
   assigned_to_id?: number | null;
 };
 

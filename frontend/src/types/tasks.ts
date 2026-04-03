@@ -1,7 +1,7 @@
 export type Quadrant = 1 | 2 | 3 | 4;
 export type TaskStatus = "active" | "completed";
 export type TaskID = number;
-export type TaskRecurrence = "daily" | "weekly" | "monthly";
+export type TaskRecurrence = "daily" | "weekly" | "monthly" | "weekdays";
 
 /**
  * API model (backend)
@@ -17,7 +17,9 @@ export interface ApiTask {
   completed: boolean;
   scheduled_for?: string | null;
   scheduled_time?: string | null;
+  scheduled_time_end?: string | null;
   recurrence?: TaskRecurrence | null;
+  exclude_holidays?: boolean | null;
   assigned_to_id?: number | null;
 
   created_at: string;
@@ -40,7 +42,9 @@ export interface Task {
   status: TaskStatus;
   scheduled_for?: string | null;
   scheduled_time?: string | null;
+  scheduled_time_end?: string | null;
   recurrence?: TaskRecurrence | null;
+  exclude_holidays?: boolean | null;
 
   createdAt: string;
   updatedAt: string;
@@ -67,7 +71,9 @@ export const fromApiTask = (t: ApiTask): Task => ({
   status: t.completed ? "completed" : "active",
   scheduled_for: t.scheduled_for ?? null,
   scheduled_time: t.scheduled_time ?? null,
+  scheduled_time_end: t.scheduled_time_end ?? null,
   recurrence: t.recurrence ?? null,
+  exclude_holidays: t.exclude_holidays ?? false,
 
   createdAt: t.created_at,
   updatedAt: t.updated_at,

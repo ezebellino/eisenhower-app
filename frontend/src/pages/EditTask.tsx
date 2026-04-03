@@ -8,6 +8,11 @@ import type { Task } from "../types/tasks";
 import "../../styles/formAnimation.css";
 import "../../styles/formStyle.css";
 
+function isEndTimeAfterStart(startTime: string | null | undefined, endTime: string | null | undefined) {
+  if (!startTime || !endTime) return true;
+  return endTime > startTime;
+}
+
 export default function EditTask() {
   const { id } = useParams();
   const taskId = Number(id);
@@ -24,7 +29,9 @@ export default function EditTask() {
   const [isImportant, setIsImportant] = useState(false);
   const [scheduledFor, setScheduledFor] = useState<string | null>(null);
   const [scheduledTime, setScheduledTime] = useState<string | null>(null);
+  const [scheduledTimeEnd, setScheduledTimeEnd] = useState<string | null>(null);
   const [recurrence, setRecurrence] = useState<Task["recurrence"]>(null);
+  const [excludeHolidays, setExcludeHolidays] = useState(false);
   const [assignedToId, setAssignedToId] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
@@ -61,7 +68,9 @@ export default function EditTask() {
         setIsImportant(found.is_important);
         setScheduledFor(found.scheduled_for ?? null);
         setScheduledTime(found.scheduled_time ?? null);
+        setScheduledTimeEnd(found.scheduled_time_end ?? null);
         setRecurrence(found.recurrence ?? null);
+        setExcludeHolidays(found.exclude_holidays ?? false);
         setAssignedToId(found.assigned_to_id ?? null);
       } catch (err: any) {
         setError(err?.message ?? "Error cargando la tarea.");
@@ -72,6 +81,32 @@ export default function EditTask() {
   const onSave = async (event: React.FormEvent) => {
     event.preventDefault();
     setError(null);
+
+    if (recurrence && !scheduledFor) {
+      setError("Selecciona una fecha base antes de repetir esta tarea.");
+      return;
+    }
+
+    if (excludeHolidays && recurrence !== "weekdays") {
+      setError("La exclusion de feriados hoy funciona con la recurrencia de lunes a viernes.");
+      return;
+    }
+
+    if (scheduledTime && !scheduledFor) {
+      setError("Selecciona una fecha antes de asignar un horario.");
+      return;
+    }
+
+    if (scheduledTimeEnd && !scheduledTime) {
+      setError("Primero define la hora de inicio.");
+      return;
+    }
+
+    if (!isEndTimeAfterStart(scheduledTime, scheduledTimeEnd)) {
+      setError("La hora de cierre debe quedar despues del inicio.");
+      return;
+    }
+
     setSaving(true);
 
     try {
@@ -82,7 +117,9 @@ export default function EditTask() {
         is_important: isImportant,
         scheduled_for: scheduledFor ?? null,
         scheduled_time: scheduledTime ?? null,
+        scheduled_time_end: scheduledTimeEnd ?? null,
         recurrence: recurrence ?? null,
+        exclude_holidays: excludeHolidays,
         assigned_to_id: isSupervisor ? assignedToId : undefined,
       });
 
@@ -170,15 +207,34 @@ export default function EditTask() {
               </div>
 
               <div className="form-field">
-                <label>Horario</label>
+                <label>Inicio</label>
                 <input
                   type="time"
                   className="form-input"
                   value={scheduledTime ?? ""}
-                  onChange={(e) => setScheduledTime(e.target.value || null)}
+                  onChange={(e) => {
+                    const value = e.target.value || null;
+                    setScheduledTime(value);
+                    if (scheduledTimeEnd && value && scheduledTimeEnd <= value) {
+                      setScheduledTimeEnd(null);
+                    }
+                  }}
                 />
                 <p className="subtle form-hint">
-                  Si la tarea tiene hora, la agenda la ordena dentro del dia.
+                  Marca desde que hora empieza este bloque dentro del dia.
+                </p>
+              </div>
+
+              <div className="form-field">
+                <label>Fin</label>
+                <input
+                  type="time"
+                  className="form-input"
+                  value={scheduledTimeEnd ?? ""}
+                  onChange={(e) => setScheduledTimeEnd(e.target.value || null)}
+                />
+                <p className="subtle form-hint">
+                  Si lo completas, la agenda puede mostrar el tramo ocupado y los huecos libres.
                 </p>
               </div>
 
@@ -188,16 +244,39 @@ export default function EditTask() {
                   className="form-input"
                   value={recurrence ?? ""}
                   onChange={(e) =>
-                    setRecurrence((e.target.value as Task["recurrence"] | "") || null)
+                    {
+                      const nextRecurrence = (e.target.value as Task["recurrence"] | "") || null;
+                      setRecurrence(nextRecurrence);
+                      if (nextRecurrence !== "weekdays") {
+                        setExcludeHolidays(false);
+                      }
+                    }
                   }
                 >
                   <option value="">No repetir</option>
                   <option value="daily">Todos los dias</option>
                   <option value="weekly">Cada semana</option>
                   <option value="monthly">Cada mes</option>
+                  <option value="weekdays">Lunes a viernes</option>
                 </select>
               </div>
             </div>
+
+            {recurrence === "weekdays" && (
+              <div className="form-field">
+                <label className="check">
+                  <input
+                    type="checkbox"
+                    checked={excludeHolidays}
+                    onChange={(e) => setExcludeHolidays(e.target.checked)}
+                  />
+                  <span>Excluir feriados de Argentina</span>
+                </label>
+                <p className="subtle form-hint">
+                  La agenda va a omitir automaticamente los feriados nacionales al proyectar esta rutina.
+                </p>
+              </div>
+            )}
 
             {isSupervisor && (
               <div className="form-field">
