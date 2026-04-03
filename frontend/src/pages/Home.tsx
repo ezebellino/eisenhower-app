@@ -25,6 +25,7 @@ import { listUsers, type UserSummary } from "../services/userService";
 type SortOption = "recent" | "oldest" | "title-asc" | "title-desc";
 type QuadrantFilter = "all" | "1" | "2" | "3" | "4";
 type SupervisorScope = "all" | "mine" | "team" | "unassigned";
+const SUPERVISOR_ONBOARDING_KEY = "eisenhower_supervisor_onboarding_dismissed";
 
 function getLatestUpdate(tasks: Task[]) {
   if (tasks.length === 0) return "Sin actividad reciente";
@@ -83,6 +84,7 @@ export default function Home() {
   const [sortBy, setSortBy] = useState<SortOption>("recent");
   const [supervisorScope, setSupervisorScope] = useState<SupervisorScope>("all");
   const [focusedAssigneeId, setFocusedAssigneeId] = useState<number | null>(null);
+  const [showSupervisorOnboarding, setShowSupervisorOnboarding] = useState(false);
   const deferredSearch = useDeferredValue(searchTerm);
   const { user } = useAuth();
   const [indexQ1, setIndexQ1] = useState(0);
@@ -136,6 +138,20 @@ export default function Home() {
     fetchTasks();
     setSessionNotice(consumeSessionNotice());
   }, []);
+
+  useEffect(() => {
+    if (user?.role !== "supervisor") {
+      setShowSupervisorOnboarding(false);
+      return;
+    }
+
+    setShowSupervisorOnboarding(localStorage.getItem(SUPERVISOR_ONBOARDING_KEY) !== "1");
+  }, [user]);
+
+  const dismissSupervisorOnboarding = () => {
+    localStorage.setItem(SUPERVISOR_ONBOARDING_KEY, "1");
+    setShowSupervisorOnboarding(false);
+  };
 
   const handleComplete = async (id: TaskID) => {
     try {
@@ -716,6 +732,67 @@ export default function Home() {
                       Ver sin asignar
                     </button>
                   </div>
+                </div>
+              </div>
+            )}
+
+            {user?.role === "supervisor" && showSupervisorOnboarding && (
+              <div className="supervisor-onboarding panel">
+                <div className="supervisor-onboarding__header">
+                  <div>
+                    <p className="team-load__eyebrow">Guia rapida</p>
+                    <h3>Como moverte en tu consola de supervisor</h3>
+                  </div>
+                  <button
+                    type="button"
+                    className="btn-ghost"
+                    onClick={dismissSupervisorOnboarding}
+                  >
+                    Ocultar
+                  </button>
+                </div>
+
+                <div className="supervisor-onboarding__grid">
+                  <article className="supervisor-onboarding__step">
+                    <span>1</span>
+                    <strong>Crea y asigna</strong>
+                    <p>Usa la creacion simple, multiple o para todo el staff segun el tipo de trabajo.</p>
+                    <Link to="/tasks/create" className="btn-primary">
+                      Nueva tarea
+                    </Link>
+                  </article>
+
+                  <article className="supervisor-onboarding__step">
+                    <span>2</span>
+                    <strong>Enfoca por persona</strong>
+                    <p>Toca cualquier tarjeta de carga del equipo para ver solo el trabajo de esa persona.</p>
+                    <button
+                      type="button"
+                      className="btn-ghost"
+                      onClick={() => {
+                        if (teamLoad[0]) setFocusedAssigneeId(teamLoad[0].id);
+                      }}
+                    >
+                      Probar foco
+                    </button>
+                  </article>
+
+                  <article className="supervisor-onboarding__step">
+                    <span>3</span>
+                    <strong>Vacía la bandeja</strong>
+                    <p>Revisa primero las tareas sin asignar para que nada importante quede sin dueño.</p>
+                    <button
+                      type="button"
+                      className="btn-ghost"
+                      onClick={() => {
+                        setFocusedAssigneeId(null);
+                        setSupervisorScope("unassigned");
+                        setSearchTerm("");
+                      }}
+                    >
+                      Ver sin asignar
+                    </button>
+                  </article>
                 </div>
               </div>
             )}
