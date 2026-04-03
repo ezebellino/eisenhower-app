@@ -165,20 +165,20 @@ export default function CreateTask() {
           <h2 id="create-task-title">Crear nueva tarea</h2>
           <p className="subtle form-subtitle">
             {isSupervisor
-              ? "Como supervisor, puedes crear la tarea y asignarla directamente a alguien del staff."
-              : "Elegi si es urgente y/o importante para ubicarla en la matriz."}
+              ? "Define la prioridad y deja la tarea lista para una persona, varias o todo el staff."
+              : "Define si es urgente y si es importante para ubicarla en el cuadrante correcto."}
           </p>
 
           <form id="task-form" onSubmit={handleSubmit}>
             <div className="form-field">
-              <label className={errors.title ? "label-shake" : ""}>Titulo</label>
+                <label className={errors.title ? "label-shake" : ""}>Titulo</label>
               <input
                 type="text"
                 name="title"
                 value={formData.title}
                 onChange={handleChange}
                 className={`form-input ${errors.title ? "input-error shake" : ""}`}
-                placeholder="Ej: Llamar al medico"
+                placeholder="Ej: Preparar reporte semanal"
               />
               {errors.title && <p className="error fade-in">{errors.title}</p>}
             </div>
@@ -190,7 +190,7 @@ export default function CreateTask() {
                 value={formData.description ?? ""}
                 onChange={handleChange}
                 className={`form-textarea ${errors.description ? "input-error shake" : ""}`}
-                placeholder="Contexto breve (opcional)"
+                placeholder="Agrega contexto, entregable o proximo paso"
               />
               {errors.description && <p className="error fade-in">{errors.description}</p>}
             </div>
@@ -226,6 +226,9 @@ export default function CreateTask() {
                 {assignmentMode === "single" && (
                   <>
                     <label className={errors.assigned_to_id ? "label-shake" : ""}>Asignar a</label>
+                    <p className="subtle form-hint">
+                      Crea una unica tarea con un responsable claro desde el inicio.
+                    </p>
                     <select
                       className={`form-input ${errors.assigned_to_id ? "input-error shake" : ""}`}
                       value={formData.assigned_to_id ?? ""}
@@ -248,6 +251,9 @@ export default function CreateTask() {
                 {assignmentMode === "multiple" && (
                   <>
                     <label className={errors.assignees ? "label-shake" : ""}>Asignar a varias personas</label>
+                    <p className="subtle form-hint">
+                      Se va a crear una copia individual para cada persona seleccionada.
+                    </p>
                     <div className={`staff-selector ${errors.assignees ? "input-error" : ""}`}>
                       {staff.map((member) => (
                         <label key={member.id} className="staff-selector__item">
@@ -268,11 +274,11 @@ export default function CreateTask() {
 
                 {assignmentMode === "all" && (
                   <div className="assignment-summary">
-                    <strong>Se creara una copia para cada persona activa del staff.</strong>
+                    <strong>Se va a crear una copia para cada persona activa del staff.</strong>
                     <p>
                       {loadingStaff
-                        ? "Cargando staff..."
-                        : `${staff.length} personas recibiran una tarea individual para seguimiento propio.`}
+                        ? "Estamos cargando el staff..."
+                        : `${staff.length} personas van a recibir una tarea individual para hacer seguimiento propio.`}
                     </p>
                     {errors.assignees && <p className="error fade-in">{errors.assignees}</p>}
                   </div>
@@ -304,7 +310,17 @@ export default function CreateTask() {
 
             {!formData.is_urgent && !formData.is_important && (
               <p className="subtle form-hint fade-in">
-                Esta tarea se ubicara en el cuadrante <strong>"Ni urgente ni importante"</strong>.
+                Esta tarea va a quedar en <strong>Q4: ni urgente ni importante</strong>.
+              </p>
+            )}
+
+            {(formData.is_urgent || formData.is_important) && (
+              <p className="subtle form-hint fade-in">
+                {formData.is_urgent && formData.is_important
+                  ? "Va directo a Q1: atencion inmediata."
+                  : formData.is_important
+                    ? "Va a Q2: trabajo importante que conviene sostener antes de que se vuelva urgente."
+                    : "Va a Q3: urgencia operativa con menor impacto estrategico."}
               </p>
             )}
 

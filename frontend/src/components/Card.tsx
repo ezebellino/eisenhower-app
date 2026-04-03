@@ -73,7 +73,9 @@ export default function Card({
       transition={{ duration: 0.24, ease: "easeOut" }}
     >
       <div className="card-topline">
-        <span className="card-date">Actualizada {formatDate(task.updatedAt)}</span>
+        <span className="card-date">
+          {isCompleted ? `Cerrada ${formatDate(task.updatedAt)}` : `Actualizada ${formatDate(task.updatedAt)}`}
+        </span>
         <span className={`card-state ${isCompleted ? "is-success" : "is-pending"}`}>
           {isCompleted ? "Completada" : "Pendiente"}
         </span>
@@ -92,9 +94,11 @@ export default function Card({
         {task.is_urgent && <span className="badge">Atencion hoy</span>}
       </div>
 
-      {assignmentLabel && (
+        {assignmentLabel && (
         <div className="card-assignment">
-          <span className="card-assignment__label">Asignacion</span>
+          <span className="card-assignment__label">
+            {isCompleted ? "Ultimo responsable" : "Responsable actual"}
+          </span>
           <strong>{assignmentLabel}</strong>
         </div>
       )}
@@ -102,36 +106,36 @@ export default function Card({
       <div className="card-actions">
         {!isCompleted && !showOnlyCompletedActions && onComplete && (
           <button onClick={() => onComplete(task.id)} className="btn-completar" type="button">
-            Marcar como completada
+            Enviar a Historial
           </button>
         )}
 
         {isCompleted && showOnlyCompletedActions && onUncomplete && (
           <button onClick={() => onUncomplete(task.id)} className="btn-revertir" type="button">
-            Reabrir tarea
+            Volver al Dashboard
           </button>
         )}
 
         {!showOnlyCompletedActions && (
           <Link to={`/tasks/${task.id}/edit`} className="btn-secondary card-link">
-            Editar
+            Ajustar detalle
           </Link>
         )}
 
         {!showOnlyCompletedActions && onDuplicate && (
           <button onClick={() => onDuplicate(task)} className="btn-duplicate" type="button">
-            Duplicar para otros
+            Copiar para otros
           </button>
         )}
 
         {!showOnlyCompletedActions && onReassign && (
           <button onClick={() => onReassign(task)} className="btn-reassign" type="button">
-            Reasignar
+            Cambiar responsable
           </button>
         )}
 
         <button onClick={() => onDelete(task.id)} className="btn-eliminar" type="button">
-          Eliminar
+          {isCompleted ? "Quitar" : "Eliminar"}
         </button>
       </div>
     </motion.article>

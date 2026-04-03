@@ -96,7 +96,7 @@ export default function CompletedTasks() {
   const handleDelete = async (id: TaskID) => {
     const confirmed = await confirmDestructiveAction({
       title: "Eliminar tarea",
-      text: "Tambien desaparecera del historial.",
+      text: "Tambien se va a quitar de tu historial de cierre.",
       confirmButtonText: "Eliminar",
     });
 
@@ -105,7 +105,7 @@ export default function CompletedTasks() {
     try {
       await deleteTask(id);
       await fetchCompleted();
-      await showSuccessToast("Tarea eliminada del historial");
+      await showSuccessToast("Tarea quitada del historial");
     } catch (error: any) {
       await showErrorAlert("No pudimos eliminar la tarea", error?.message ?? "Intenta otra vez.");
     }
@@ -115,7 +115,7 @@ export default function CompletedTasks() {
     try {
       await uncompleteTask(id);
       await fetchCompleted();
-      await showSuccessToast("Tarea enviada al Dashboard");
+      await showSuccessToast("Tarea devuelta al Dashboard");
       navigate("/tasks");
     } catch (error: any) {
       await showErrorAlert("No pudimos reabrir la tarea", error?.message ?? "Intenta otra vez.");
@@ -164,18 +164,18 @@ export default function CompletedTasks() {
     <div className="page container">
       <EisenhowerMatrix
         title="Historial completado"
-        description="Revisa lo que ya cerraste y recupera una tarea si todavia necesita ajustes."
+        description="Revisa lo que ya cerraste, detecta patrones y reabre algo si todavia necesita seguimiento."
         banner={
           <>
             {isLoadingTasks && (
               <div className="matrix-banner matrix-banner--info">
-                <p>Cargando el historial...</p>
+                <p>Estamos cargando tu historial...</p>
               </div>
             )}
 
             {loadError && (
               <div className="matrix-banner matrix-banner--error">
-                <p>No pudimos cargar el historial.</p>
+                <p>No pudimos cargar el historial por ahora.</p>
                 <small>{loadError}</small>
                 <button
                   type="button"
@@ -196,7 +196,7 @@ export default function CompletedTasks() {
                 type="search"
                 value={searchTerm}
                 onChange={(event) => setSearchTerm(event.target.value)}
-                placeholder="Titulo o descripcion"
+                placeholder="Buscar por titulo o descripcion"
               />
             </div>
 

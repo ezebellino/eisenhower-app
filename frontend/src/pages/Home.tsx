@@ -642,7 +642,7 @@ export default function Home() {
                     <p className="unassigned-queue__summary">
                       {unassignedTasks === 0
                         ? "No hay tareas sueltas ahora mismo. Buena senal de control operativo."
-                        : "Prioriza esta bandeja para que nada importante quede sin dueno."}
+                        : "Prioriza esta bandeja para que nada importante quede sin responsable."}
                     </p>
 
                     {unassignedQueue.length > 0 ? (
@@ -756,7 +756,7 @@ export default function Home() {
                   <article className="supervisor-onboarding__step">
                     <span>1</span>
                     <strong>Crea y asigna</strong>
-                    <p>Usa la creacion simple, multiple o para todo el staff segun el tipo de trabajo.</p>
+                    <p>Elige si la tarea va para una persona, varias o todo el staff segun el seguimiento que necesites.</p>
                     <Link to="/tasks/create" className="btn-primary">
                       Nueva tarea
                     </Link>
@@ -765,7 +765,7 @@ export default function Home() {
                   <article className="supervisor-onboarding__step">
                     <span>2</span>
                     <strong>Enfoca por persona</strong>
-                    <p>Toca cualquier tarjeta de carga del equipo para ver solo el trabajo de esa persona.</p>
+                    <p>Haz click en cualquier tarjeta de carga para ver solo lo que hoy tiene esa persona.</p>
                     <button
                       type="button"
                       className="btn-ghost"
@@ -780,7 +780,7 @@ export default function Home() {
                   <article className="supervisor-onboarding__step">
                     <span>3</span>
                     <strong>Vacía la bandeja</strong>
-                    <p>Revisa primero las tareas sin asignar para que nada importante quede sin dueño.</p>
+                    <p>Revisa primero las tareas sin asignar para que nada importante quede sin responsable.</p>
                     <button
                       type="button"
                       className="btn-ghost"

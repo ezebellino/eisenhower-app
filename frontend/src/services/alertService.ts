@@ -78,7 +78,7 @@ export async function selectDuplicationTargets(
     <div class="swal-staff-picker">
       <p style="margin:0 0 12px 0;color:#c7d4ea;">
         ${currentAssigneeLabel ? `Responsable actual: <strong>${escapeHtml(currentAssigneeLabel)}</strong><br />` : ""}
-        Selecciona a quien quieres duplicar esta tarea.
+        Elige quienes van a recibir una copia individual de esta tarea.
       </p>
       <div style="display:grid;gap:10px;max-height:240px;overflow:auto;text-align:left;">
         ${users
@@ -101,8 +101,8 @@ export async function selectDuplicationTargets(
     html,
     showCancelButton: true,
     showDenyButton: users.length > 1,
-    confirmButtonText: "Duplicar seleccionados",
-    denyButtonText: "Todo el staff",
+    confirmButtonText: "Crear copias",
+    denyButtonText: "Duplicar para todo el staff",
     cancelButtonText: "Cancelar",
     preConfirm: () => {
       const container = Swal.getHtmlContainer();
@@ -111,7 +111,7 @@ export async function selectDuplicationTargets(
       ).map((input) => Number(input.value));
 
       if (checked.length === 0) {
-        Swal.showValidationMessage("Selecciona al menos una persona.");
+        Swal.showValidationMessage("Selecciona al menos una persona para continuar.");
         return undefined;
       }
 
@@ -132,7 +132,7 @@ export async function selectReassignmentTarget(
     <div class="swal-staff-picker">
       <p style="margin:0 0 12px 0;color:#c7d4ea;text-align:left;">
         ${currentAssigneeLabel ? `Responsable actual: <strong>${escapeHtml(currentAssigneeLabel)}</strong><br />` : ""}
-        Selecciona el nuevo responsable.
+        Elige quien se va a hacer cargo de esta tarea a partir de ahora.
       </p>
       <div style="display:grid;gap:10px;max-height:240px;overflow:auto;text-align:left;">
         ${users
@@ -162,7 +162,7 @@ export async function selectReassignmentTarget(
         'input[data-reassign-target]:checked'
       );
       if (!selected?.value) {
-        Swal.showValidationMessage("Selecciona una persona.");
+        Swal.showValidationMessage("Selecciona una persona para reasignar la tarea.");
         return undefined;
       }
 

@@ -121,14 +121,19 @@ export default function EditTask() {
           <h2>Editar tarea</h2>
           <p className="subtle form-subtitle">
             {isSupervisor
-              ? "Ajusta la prioridad o reasigna esta tarea dentro del equipo."
-              : "Ajusta el contenido o cambia su prioridad para reubicarla en la matriz."}
+              ? "Actualiza el contexto, revisa la prioridad o mueve la tarea a otra persona del equipo."
+              : "Ajusta el contenido o la prioridad para mantener la tarea en el cuadrante correcto."}
           </p>
 
           <form onSubmit={onSave} id="task-form">
             <div className="form-field">
               <label>Titulo</label>
-              <input className="form-input" value={title} onChange={(e) => setTitle(e.target.value)} />
+              <input
+                className="form-input"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="Resume la accion principal"
+              />
             </div>
 
             <div className="form-field">
@@ -137,12 +142,16 @@ export default function EditTask() {
                 className="form-textarea"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
+                placeholder="Aclara contexto, entregable o siguiente paso"
               />
             </div>
 
             {isSupervisor && (
               <div className="form-field">
                 <label>Asignar a</label>
+                <p className="subtle form-hint">
+                  Cambia el responsable cuando haga falta redistribuir carga o destrabar avance.
+                </p>
                 <select
                   className="form-input"
                   value={assignedToId ?? ""}
@@ -178,6 +187,16 @@ export default function EditTask() {
                 <span>Importante</span>
               </label>
             </div>
+
+            <p className="subtle form-hint fade-in">
+              {isUrgent && isImportant
+                ? "Esta tarea esta en Q1: urgente e importante."
+                : isImportant
+                  ? "Esta tarea esta en Q2: importante, pero todavia sin urgencia."
+                  : isUrgent
+                    ? "Esta tarea esta en Q3: urgente, pero con menor impacto estrategico."
+                    : "Esta tarea esta en Q4: baja prioridad por ahora."}
+            </p>
 
             {error && <p className="error">{error}</p>}
 
