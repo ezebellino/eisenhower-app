@@ -259,6 +259,8 @@ export default function Home() {
         }));
       }
 
+      const previousAssigneeId = task.assigned_to_id ?? null;
+
       await updateTask(task.id, {
         title: task.title,
         description: task.description ?? null,
@@ -266,6 +268,10 @@ export default function Home() {
         is_important: task.is_important,
         assigned_to_id: targetId,
       });
+
+      if (focusedAssigneeId != null && previousAssigneeId === focusedAssigneeId && targetId !== focusedAssigneeId) {
+        setFocusedAssigneeId(targetId);
+      }
 
       await fetchTasks();
       await showSuccessToast("Tarea reasignada");

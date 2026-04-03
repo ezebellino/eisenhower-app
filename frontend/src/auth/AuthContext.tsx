@@ -1,7 +1,8 @@
 // src/auth/AuthContext.tsx
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { me, logout as logoutService } from "../services/authService";
-import { AUTH_EXPIRED_EVENT, getToken } from "../services/api";
+import { AUTH_EXPIRED_EVENT, getAuthExpiredNotice, getToken } from "../services/api";
+import { setSessionNotice } from "../services/sessionNoticeService";
 
 type Role = "user" | "supervisor";
 
@@ -58,6 +59,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const handleAuthExpired = () => {
       logout();
+      setSessionNotice(getAuthExpiredNotice());
+      if (window.location.pathname !== "/login") {
+        window.location.replace("/login");
+      }
     };
 
     window.addEventListener(AUTH_EXPIRED_EVENT, handleAuthExpired);
