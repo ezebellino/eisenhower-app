@@ -123,3 +123,53 @@ export async function selectDuplicationTargets(
   if (result.isConfirmed) return result.value as number[];
   return null;
 }
+
+export async function selectReassignmentTarget(
+  users: UserSummary[],
+  currentAssigneeLabel?: string | null
+): Promise<number | null> {
+  const html = `
+    <div class="swal-staff-picker">
+      <p style="margin:0 0 12px 0;color:#c7d4ea;text-align:left;">
+        ${currentAssigneeLabel ? `Responsable actual: <strong>${escapeHtml(currentAssigneeLabel)}</strong><br />` : ""}
+        Selecciona el nuevo responsable.
+      </p>
+      <div style="display:grid;gap:10px;max-height:240px;overflow:auto;text-align:left;">
+        ${users
+          .map(
+            (user) => `
+              <label style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);cursor:pointer;">
+                <input type="radio" name="reassign-target" value="${user.id}" data-reassign-target />
+                <span>${escapeHtml(user.username)}${user.role === "supervisor" ? " (Supervisor)" : ""}</span>
+              </label>
+            `
+          )
+          .join("")}
+      </div>
+    </div>
+  `;
+
+  const result = await Swal.fire({
+    ...baseOptions,
+    title: "Reasignar tarea",
+    html,
+    showCancelButton: true,
+    confirmButtonText: "Reasignar",
+    cancelButtonText: "Cancelar",
+    preConfirm: () => {
+      const container = Swal.getHtmlContainer();
+      const selected = container?.querySelector<HTMLInputElement>(
+        'input[data-reassign-target]:checked'
+      );
+      if (!selected?.value) {
+        Swal.showValidationMessage("Selecciona una persona.");
+        return undefined;
+      }
+
+      return Number(selected.value);
+    },
+  });
+
+  if (!result.isConfirmed) return null;
+  return result.value as number;
+}

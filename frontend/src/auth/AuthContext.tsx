@@ -1,7 +1,7 @@
 // src/auth/AuthContext.tsx
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { me, logout as logoutService } from "../services/authService";
-import { getToken } from "../services/api";
+import { AUTH_EXPIRED_EVENT, getToken } from "../services/api";
 
 type Role = "user" | "supervisor";
 
@@ -53,6 +53,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    const handleAuthExpired = () => {
+      logout();
+    };
+
+    window.addEventListener(AUTH_EXPIRED_EVENT, handleAuthExpired);
+    return () => window.removeEventListener(AUTH_EXPIRED_EVENT, handleAuthExpired);
   }, []);
 
   const value = useMemo(

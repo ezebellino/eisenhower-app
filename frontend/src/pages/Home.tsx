@@ -4,6 +4,7 @@ import EisenhowerMatrix from "../components/EisenhowerMatrix";
 import {
   confirmDestructiveAction,
   selectDuplicationTargets,
+  selectReassignmentTarget,
   showErrorAlert,
   showInfoAlert,
   showSuccessToast,
@@ -14,6 +15,7 @@ import {
   createTask,
   deleteTask,
   getAllTasks,
+  updateTask,
   uncompleteTask,
 } from "../services/taskServices";
 import type { Task, TaskID } from "../types/tasks";
@@ -68,6 +70,7 @@ export default function Home() {
   const [loadError, setLoadError] = useState<string | null>(null);
   const [sessionNotice, setSessionNotice] = useState<string | null>(null);
   const [staffUsers, setStaffUsers] = useState<UserSummary[]>([]);
+  const [knownAssigneeNames, setKnownAssigneeNames] = useState<Record<number, string>>({});
   const [searchTerm, setSearchTerm] = useState("");
   const [quadrantFilter, setQuadrantFilter] = useState<QuadrantFilter>("all");
   const [sortBy, setSortBy] = useState<SortOption>("recent");
@@ -99,6 +102,13 @@ export default function Home() {
 
       if (usersResult.status === "fulfilled") {
         setStaffUsers(usersResult.value);
+        setKnownAssigneeNames((prev) => {
+          const next = { ...prev };
+          for (const staffUser of usersResult.value) {
+            next[staffUser.id] = staffUser.username;
+          }
+          return next;
+        });
       } else {
         setStaffUsers([]);
         console.error("Error al obtener usuarios del staff:", usersResult.reason);
@@ -185,6 +195,14 @@ export default function Home() {
       targetSelection === "all" ? eligibleUsers.map((staffUser) => staffUser.id) : targetSelection;
 
     try {
+      setKnownAssigneeNames((prev) => {
+        const next = { ...prev };
+        for (const staffUser of eligibleUsers) {
+          next[staffUser.id] = staffUser.username;
+        }
+        return next;
+      });
+
       for (const targetId of targetIds) {
         await createTask({
           title: task.title,
@@ -204,6 +222,56 @@ export default function Home() {
     } catch (error: any) {
       await showErrorAlert(
         "No pudimos duplicar la tarea",
+        error?.message ?? "Intenta otra vez."
+      );
+    }
+  };
+
+  const handleReassignTask = async (task: Task) => {
+    if (user?.role !== "supervisor") return;
+
+    const eligibleUsers = staffUsers.filter(
+      (staffUser) => staffUser.is_active && staffUser.id !== task.assigned_to_id
+    );
+
+    if (eligibleUsers.length === 0) {
+      await showInfoAlert(
+        "No hay destinatarios disponibles",
+        "No encontramos otra persona activa para reasignar esta tarea."
+      );
+      return;
+    }
+
+    const currentAssigneeLabel =
+      task.assigned_to_id == null
+        ? "Sin asignar"
+        : assigneeLookup.get(task.assigned_to_id) ?? `Usuario #${task.assigned_to_id}`;
+
+    const targetId = await selectReassignmentTarget(eligibleUsers, currentAssigneeLabel);
+    if (targetId == null) return;
+
+    try {
+      const selectedUser = eligibleUsers.find((staffUser) => staffUser.id === targetId);
+      if (selectedUser) {
+        setKnownAssigneeNames((prev) => ({
+          ...prev,
+          [selectedUser.id]: selectedUser.username,
+        }));
+      }
+
+      await updateTask(task.id, {
+        title: task.title,
+        description: task.description ?? null,
+        is_urgent: task.is_urgent,
+        is_important: task.is_important,
+        assigned_to_id: targetId,
+      });
+
+      await fetchTasks();
+      await showSuccessToast("Tarea reasignada");
+    } catch (error: any) {
+      await showErrorAlert(
+        "No pudimos reasignar la tarea",
         error?.message ?? "Intenta otra vez."
       );
     }
@@ -331,8 +399,12 @@ export default function Home() {
   }, [activeTasks, deferredSearch, focusedAssigneeId, quadrantFilter, sortBy, supervisorScope, user]);
 
   const assigneeLookup = useMemo(
-    () => new Map(staffUsers.map((staffUser) => [staffUser.id, staffUser.username])),
-    [staffUsers]
+    () =>
+      new Map([
+        ...Object.entries(knownAssigneeNames).map(([id, username]) => [Number(id), username] as const),
+        ...staffUsers.map((staffUser) => [staffUser.id, staffUser.username] as const),
+      ]),
+    [knownAssigneeNames, staffUsers]
   );
 
   const teamLoad = useMemo(() => {
@@ -670,6 +742,7 @@ export default function Home() {
         onComplete={handleComplete}
         onDelete={handleDelete}
         onDuplicate={user?.role === "supervisor" ? handleDuplicateTask : undefined}
+        onReassign={user?.role === "supervisor" ? handleReassignTask : undefined}
         onUncomplete={handleUncomplete}
         indexQ1={indexQ1}
         indexQ2={indexQ2}

@@ -10,6 +10,7 @@ type Props = {
   onDelete: (id: TaskID) => Promise<void> | void;
   onUncomplete?: (id: TaskID) => Promise<void> | void;
   onDuplicate?: (task: Task) => Promise<void> | void;
+  onReassign?: (task: Task) => Promise<void> | void;
   showOnlyCompletedActions?: boolean;
 };
 
@@ -58,6 +59,7 @@ export default function Card({
   onDelete,
   onUncomplete,
   onDuplicate,
+  onReassign,
   showOnlyCompletedActions = false,
 }: Props) {
   const isCompleted = task.status === "completed";
@@ -119,6 +121,12 @@ export default function Card({
         {!showOnlyCompletedActions && onDuplicate && (
           <button onClick={() => onDuplicate(task)} className="btn-duplicate" type="button">
             Duplicar para otros
+          </button>
+        )}
+
+        {!showOnlyCompletedActions && onReassign && (
+          <button onClick={() => onReassign(task)} className="btn-reassign" type="button">
+            Reasignar
           </button>
         )}
 

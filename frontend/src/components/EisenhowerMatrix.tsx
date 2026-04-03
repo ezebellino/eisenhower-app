@@ -16,6 +16,7 @@ type Props = {
   onDelete: (id: TaskID) => Promise<void> | void;
   onUncomplete?: (id: TaskID) => Promise<void> | void;
   onDuplicate?: (task: Task) => Promise<void> | void;
+  onReassign?: (task: Task) => Promise<void> | void;
   indexQ1: number;
   indexQ2: number;
   indexQ3: number;
@@ -129,6 +130,7 @@ export default function EisenhowerMatrix({
   onDelete,
   onUncomplete,
   onDuplicate,
+  onReassign,
   indexQ1,
   indexQ2,
   indexQ3,
@@ -232,6 +234,7 @@ export default function EisenhowerMatrix({
                       onDelete={onDelete}
                       onUncomplete={onUncomplete}
                       onDuplicate={onDuplicate}
+                      onReassign={onReassign}
                       showOnlyCompletedActions={showOnlyCompletedActions}
                     />
 
