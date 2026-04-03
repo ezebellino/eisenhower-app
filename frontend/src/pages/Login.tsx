@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 import { showErrorAlert, showInfoAlert, showSuccessToast } from "../services/alertService";
 import { login } from "../services/authService";
-import { setSessionNotice } from "../services/sessionNoticeService";
+import { consumeSessionNotice, setSessionNotice } from "../services/sessionNoticeService";
 import { migrateLocalTasksToAccount } from "../services/taskMigrationService";
 import "../../styles/Login.css";
 
@@ -21,6 +21,14 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [err, setErr] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const notice = consumeSessionNotice();
+    if (!notice) return;
+
+    setErr(notice);
+    void showInfoAlert("Sesion requerida", notice);
+  }, []);
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

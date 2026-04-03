@@ -25,6 +25,7 @@ import { listUsers, type UserSummary } from "../services/userService";
 type SortOption = "recent" | "oldest" | "title-asc" | "title-desc";
 type QuadrantFilter = "all" | "1" | "2" | "3" | "4";
 type SupervisorScope = "all" | "mine" | "team" | "unassigned";
+const SUPERVISOR_ONBOARDING_KEY = "eisenhower_supervisor_onboarding_dismissed";
 
 function getLatestUpdate(tasks: Task[]) {
   if (tasks.length === 0) return "Sin actividad reciente";
@@ -64,6 +65,13 @@ function sortTasks(tasks: Task[], sortBy: SortOption) {
   return sorted;
 }
 
+function isWithinLastDays(value: string, days: number) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return false;
+  const diff = Date.now() - date.getTime();
+  return diff <= days * 24 * 60 * 60 * 1000;
+}
+
 export default function Home() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [isLoadingTasks, setIsLoadingTasks] = useState(true);
@@ -76,6 +84,7 @@ export default function Home() {
   const [sortBy, setSortBy] = useState<SortOption>("recent");
   const [supervisorScope, setSupervisorScope] = useState<SupervisorScope>("all");
   const [focusedAssigneeId, setFocusedAssigneeId] = useState<number | null>(null);
+  const [showSupervisorOnboarding, setShowSupervisorOnboarding] = useState(false);
   const deferredSearch = useDeferredValue(searchTerm);
   const { user } = useAuth();
   const [indexQ1, setIndexQ1] = useState(0);
@@ -129,6 +138,20 @@ export default function Home() {
     fetchTasks();
     setSessionNotice(consumeSessionNotice());
   }, []);
+
+  useEffect(() => {
+    if (user?.role !== "supervisor") {
+      setShowSupervisorOnboarding(false);
+      return;
+    }
+
+    setShowSupervisorOnboarding(localStorage.getItem(SUPERVISOR_ONBOARDING_KEY) !== "1");
+  }, [user]);
+
+  const dismissSupervisorOnboarding = () => {
+    localStorage.setItem(SUPERVISOR_ONBOARDING_KEY, "1");
+    setShowSupervisorOnboarding(false);
+  };
 
   const handleComplete = async (id: TaskID) => {
     try {
@@ -259,6 +282,8 @@ export default function Home() {
         }));
       }
 
+      const previousAssigneeId = task.assigned_to_id ?? null;
+
       await updateTask(task.id, {
         title: task.title,
         description: task.description ?? null,
@@ -266,6 +291,10 @@ export default function Home() {
         is_important: task.is_important,
         assigned_to_id: targetId,
       });
+
+      if (focusedAssigneeId != null && previousAssigneeId === focusedAssigneeId && targetId !== focusedAssigneeId) {
+        setFocusedAssigneeId(targetId);
+      }
 
       await fetchTasks();
       await showSuccessToast("Tarea reasignada");
@@ -278,6 +307,7 @@ export default function Home() {
   };
 
   const activeTasks = tasks.filter((task) => task.status === "active");
+  const completedTasks = tasks.filter((task) => task.status === "completed");
   const criticalTasks = activeTasks.filter((task) => task.quadrant === 1).length;
   const strategicTasks = activeTasks.filter((task) => task.quadrant === 2).length;
   const reactiveTasks = activeTasks.filter((task) => task.quadrant === 3).length;
@@ -297,6 +327,16 @@ export default function Home() {
   const q1TeamRisk = user
     ? activeTasks.filter((task) => task.quadrant === 1 && task.assigned_to_id !== user.id).length
     : 0;
+  const completedThisWeek = completedTasks.filter((task) => isWithinLastDays(task.updatedAt, 7)).length;
+  const touchedThisWeek = tasks.filter((task) => isWithinLastDays(task.updatedAt, 7)).length;
+  const weeklyCompletionRate =
+    touchedThisWeek === 0 ? 0 : Math.round((completedThisWeek / touchedThisWeek) * 100);
+  const assignmentCoverage =
+    activeTasks.length === 0
+      ? 100
+      : Math.round(((activeTasks.length - unassignedTasks) / activeTasks.length) * 100);
+  const strategicShare =
+    activeTasks.length === 0 ? 0 : Math.round((strategicTasks / activeTasks.length) * 100);
 
   const dashboardHighlights =
     user?.role === "supervisor"
@@ -366,6 +406,43 @@ export default function Home() {
             value: `${focusRatio}%`,
             helper: `Ultima actualizacion ${getLatestUpdate(activeTasks)}`,
             tone: "is-focus",
+          },
+        ];
+
+  const dashboardInsights =
+    user?.role === "supervisor"
+      ? [
+          {
+            label: "Cierres semanales",
+            value: String(completedThisWeek),
+            helper: completedThisWeek === 0 ? "Todavia no hubo cierres en 7 dias" : "Tareas completadas en los ultimos 7 dias",
+          },
+          {
+            label: "Cobertura",
+            value: `${assignmentCoverage}%`,
+            helper: "Porcentaje de tareas activas que ya tienen responsable",
+          },
+          {
+            label: "Ritmo de cierre",
+            value: `${weeklyCompletionRate}%`,
+            helper: "Relacion entre actividad reciente y tareas cerradas",
+          },
+        ]
+      : [
+          {
+            label: "Cierres semanales",
+            value: String(completedThisWeek),
+            helper: completedThisWeek === 0 ? "Aun no cerraste tareas esta semana" : "Tareas completadas en los ultimos 7 dias",
+          },
+          {
+            label: "Peso estrategico",
+            value: `${strategicShare}%`,
+            helper: "Cuanto de tu carga activa vive en Q2",
+          },
+          {
+            label: "Ritmo de cierre",
+            value: `${weeklyCompletionRate}%`,
+            helper: "Relacion entre actividad reciente y tareas cerradas",
           },
         ];
 
@@ -486,6 +563,16 @@ export default function Home() {
               <div className="dashboard-summary__grid">
                 {dashboardHighlights.map((item) => (
                   <article key={item.label} className={`dashboard-kpi ${item.tone}`}>
+                    <span>{item.label}</span>
+                    <strong>{item.value}</strong>
+                    <small>{item.helper}</small>
+                  </article>
+                ))}
+              </div>
+
+              <div className="dashboard-insights">
+                {dashboardInsights.map((item) => (
+                  <article key={item.label} className="dashboard-insight">
                     <span>{item.label}</span>
                     <strong>{item.value}</strong>
                     <small>{item.helper}</small>
@@ -645,6 +732,67 @@ export default function Home() {
                       Ver sin asignar
                     </button>
                   </div>
+                </div>
+              </div>
+            )}
+
+            {user?.role === "supervisor" && showSupervisorOnboarding && (
+              <div className="supervisor-onboarding panel">
+                <div className="supervisor-onboarding__header">
+                  <div>
+                    <p className="team-load__eyebrow">Guia rapida</p>
+                    <h3>Como moverte en tu consola de supervisor</h3>
+                  </div>
+                  <button
+                    type="button"
+                    className="btn-ghost"
+                    onClick={dismissSupervisorOnboarding}
+                  >
+                    Ocultar
+                  </button>
+                </div>
+
+                <div className="supervisor-onboarding__grid">
+                  <article className="supervisor-onboarding__step">
+                    <span>1</span>
+                    <strong>Crea y asigna</strong>
+                    <p>Usa la creacion simple, multiple o para todo el staff segun el tipo de trabajo.</p>
+                    <Link to="/tasks/create" className="btn-primary">
+                      Nueva tarea
+                    </Link>
+                  </article>
+
+                  <article className="supervisor-onboarding__step">
+                    <span>2</span>
+                    <strong>Enfoca por persona</strong>
+                    <p>Toca cualquier tarjeta de carga del equipo para ver solo el trabajo de esa persona.</p>
+                    <button
+                      type="button"
+                      className="btn-ghost"
+                      onClick={() => {
+                        if (teamLoad[0]) setFocusedAssigneeId(teamLoad[0].id);
+                      }}
+                    >
+                      Probar foco
+                    </button>
+                  </article>
+
+                  <article className="supervisor-onboarding__step">
+                    <span>3</span>
+                    <strong>Vacía la bandeja</strong>
+                    <p>Revisa primero las tareas sin asignar para que nada importante quede sin dueño.</p>
+                    <button
+                      type="button"
+                      className="btn-ghost"
+                      onClick={() => {
+                        setFocusedAssigneeId(null);
+                        setSupervisorScope("unassigned");
+                        setSearchTerm("");
+                      }}
+                    >
+                      Ver sin asignar
+                    </button>
+                  </article>
                 </div>
               </div>
             )}
