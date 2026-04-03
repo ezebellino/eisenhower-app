@@ -79,16 +79,16 @@ function EmptyCollectionState({ mode }: { mode: "active" | "completed" }) {
       <div className="matrix-empty-state panel">
         <div className="matrix-empty-state__copy">
           <p className="matrix-empty-state__eyebrow">Historial vacio</p>
-          <h2>Todavia no terminaste ninguna tarea.</h2>
+          <h2>Todavia no cerraste ninguna tarea.</h2>
           <p>
-            Cuando marques tareas como completadas, van a aparecer aca para que puedas revisar lo
-            que ya resolviste o reabrir algo si hace falta.
+            Cuando mandes tareas a Historial, van a aparecer aca para que puedas revisar cierres,
+            recuperar contexto o reabrir algo si hace falta.
           </p>
         </div>
 
         <div className="matrix-empty-state__actions">
           <Link to="/tasks" className="btn-primary">
-            Ir al Dashboard
+            Abrir Dashboard
           </Link>
         </div>
       </div>

@@ -7,7 +7,7 @@ import { listUsers, type UserSummary } from "../services/userService";
 import "../../styles/formAnimation.css";
 import "../../styles/formStyle.css";
 
-type AssignmentMode = "single" | "multiple" | "all";
+type AssignmentMode = "single" | "multiple" | "all" | "unassigned";
 type FormErrors = Partial<Record<keyof CreateTaskPayload | "general" | "assignees", string>>;
 
 export default function CreateTask() {
@@ -24,6 +24,9 @@ export default function CreateTask() {
     description: "",
     is_urgent: false,
     is_important: false,
+    scheduled_for: null,
+    scheduled_time: null,
+    recurrence: null,
     assigned_to_id: null,
   });
 
@@ -63,6 +66,14 @@ export default function CreateTask() {
       newErrors.description = "La descripcion debe tener al menos 5 caracteres";
     }
 
+    if (formData.recurrence && !formData.scheduled_for) {
+      newErrors.scheduled_for = "Selecciona una fecha base para repetir esta tarea";
+    }
+
+    if (formData.scheduled_time && !formData.scheduled_for) {
+      newErrors.scheduled_for = "Selecciona una fecha antes de asignar un horario";
+    }
+
     if (isSupervisor) {
       if (assignmentMode === "single" && !formData.assigned_to_id) {
         newErrors.assigned_to_id = "Selecciona una persona del staff";
@@ -90,6 +101,30 @@ export default function CreateTask() {
     }));
   };
 
+  const handleScheduleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setFormData((prev) => ({
+      ...prev,
+      scheduled_for: value || null,
+    }));
+  };
+
+  const handleRecurrenceChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = e.target.value as CreateTaskPayload["recurrence"] | "";
+    setFormData((prev) => ({
+      ...prev,
+      recurrence: value || null,
+    }));
+  };
+
+  const handleScheduleTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setFormData((prev) => ({
+      ...prev,
+      scheduled_time: value || null,
+    }));
+  };
+
   const handleAssigneeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const value = e.target.value;
     setFormData((prev) => ({
@@ -109,6 +144,12 @@ export default function CreateTask() {
   const handleAssignmentModeChange = (mode: AssignmentMode) => {
     setAssignmentMode(mode);
     setErrors((prev) => ({ ...prev, assigned_to_id: undefined, assignees: undefined }));
+    if (mode !== "single") {
+      setFormData((prev) => ({ ...prev, assigned_to_id: null }));
+    }
+    if (mode !== "multiple") {
+      setSelectedAssigneeIds([]);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -126,14 +167,21 @@ export default function CreateTask() {
         description: formData.description?.trim() ? formData.description.trim() : "",
         is_urgent: formData.is_urgent,
         is_important: formData.is_important,
+        scheduled_for: formData.scheduled_for ?? null,
+        scheduled_time: formData.scheduled_time ?? null,
+        recurrence: formData.recurrence ?? null,
       };
 
       const targetAssigneeIds =
-        !isSupervisor || assignmentMode === "single"
+        !isSupervisor
+          ? [formData.assigned_to_id ?? null]
+          : assignmentMode === "single"
           ? [formData.assigned_to_id ?? null]
           : assignmentMode === "multiple"
             ? selectedAssigneeIds
-            : staff.map((member) => member.id);
+            : assignmentMode === "all"
+              ? staff.map((member) => member.id)
+              : [null];
 
       let createdCount = 0;
 
@@ -165,20 +213,20 @@ export default function CreateTask() {
           <h2 id="create-task-title">Crear nueva tarea</h2>
           <p className="subtle form-subtitle">
             {isSupervisor
-              ? "Como supervisor, puedes crear la tarea y asignarla directamente a alguien del staff."
-              : "Elegi si es urgente y/o importante para ubicarla en la matriz."}
+              ? "Define la prioridad y decide si la tarea sale con responsable, se reparte o queda pendiente de asignacion."
+              : "Define si es urgente y si es importante para ubicarla en el cuadrante correcto."}
           </p>
 
           <form id="task-form" onSubmit={handleSubmit}>
             <div className="form-field">
-              <label className={errors.title ? "label-shake" : ""}>Titulo</label>
+                <label className={errors.title ? "label-shake" : ""}>Titulo</label>
               <input
                 type="text"
                 name="title"
                 value={formData.title}
                 onChange={handleChange}
                 className={`form-input ${errors.title ? "input-error shake" : ""}`}
-                placeholder="Ej: Llamar al medico"
+                placeholder="Ej: Preparar reporte semanal"
               />
               {errors.title && <p className="error fade-in">{errors.title}</p>}
             </div>
@@ -190,9 +238,55 @@ export default function CreateTask() {
                 value={formData.description ?? ""}
                 onChange={handleChange}
                 className={`form-textarea ${errors.description ? "input-error shake" : ""}`}
-                placeholder="Contexto breve (opcional)"
+                placeholder="Agrega contexto, entregable o proximo paso"
               />
               {errors.description && <p className="error fade-in">{errors.description}</p>}
+            </div>
+
+            <div className="form-grid form-grid--schedule">
+              <div className="form-field">
+                <label className={errors.scheduled_for ? "label-shake" : ""}>Programar para</label>
+                <input
+                  type="date"
+                  value={formData.scheduled_for ?? ""}
+                  onChange={handleScheduleDateChange}
+                  className={`form-input ${errors.scheduled_for ? "input-error shake" : ""}`}
+                />
+                <p className="subtle form-hint">
+                  Si eliges fecha, la tarea va a aparecer en tu agenda personal.
+                </p>
+                {errors.scheduled_for && <p className="error fade-in">{errors.scheduled_for}</p>}
+              </div>
+
+              <div className="form-field">
+                <label>Horario</label>
+                <input
+                  type="time"
+                  value={formData.scheduled_time ?? ""}
+                  onChange={handleScheduleTimeChange}
+                  className="form-input"
+                />
+                <p className="subtle form-hint">
+                  Si lo completas, la agenda del dia lo va a mostrar como bloque ocupado.
+                </p>
+              </div>
+
+              <div className="form-field">
+                <label>Repetir</label>
+                <select
+                  className="form-input"
+                  value={formData.recurrence ?? ""}
+                  onChange={handleRecurrenceChange}
+                >
+                  <option value="">No repetir</option>
+                  <option value="daily">Todos los dias</option>
+                  <option value="weekly">Cada semana</option>
+                  <option value="monthly">Cada mes</option>
+                </select>
+                <p className="subtle form-hint">
+                  Ideal para rutinas, revisiones o tareas que vuelven en el tiempo.
+                </p>
+              </div>
             </div>
 
             {isSupervisor && (
@@ -221,11 +315,21 @@ export default function CreateTask() {
                   >
                     Todo el staff
                   </button>
+                  <button
+                    type="button"
+                    className={`assignment-mode ${assignmentMode === "unassigned" ? "is-active" : ""}`}
+                    onClick={() => handleAssignmentModeChange("unassigned")}
+                  >
+                    Sin responsable
+                  </button>
                 </div>
 
                 {assignmentMode === "single" && (
                   <>
                     <label className={errors.assigned_to_id ? "label-shake" : ""}>Asignar a</label>
+                    <p className="subtle form-hint">
+                      Crea una unica tarea con un responsable claro desde el inicio.
+                    </p>
                     <select
                       className={`form-input ${errors.assigned_to_id ? "input-error shake" : ""}`}
                       value={formData.assigned_to_id ?? ""}
@@ -248,6 +352,9 @@ export default function CreateTask() {
                 {assignmentMode === "multiple" && (
                   <>
                     <label className={errors.assignees ? "label-shake" : ""}>Asignar a varias personas</label>
+                    <p className="subtle form-hint">
+                      Se va a crear una copia individual para cada persona seleccionada.
+                    </p>
                     <div className={`staff-selector ${errors.assignees ? "input-error" : ""}`}>
                       {staff.map((member) => (
                         <label key={member.id} className="staff-selector__item">
@@ -268,13 +375,23 @@ export default function CreateTask() {
 
                 {assignmentMode === "all" && (
                   <div className="assignment-summary">
-                    <strong>Se creara una copia para cada persona activa del staff.</strong>
+                    <strong>Se va a crear una copia para cada persona activa del staff.</strong>
                     <p>
                       {loadingStaff
-                        ? "Cargando staff..."
-                        : `${staff.length} personas recibiran una tarea individual para seguimiento propio.`}
+                        ? "Estamos cargando el staff..."
+                        : `${staff.length} personas van a recibir una tarea individual para hacer seguimiento propio.`}
                     </p>
                     {errors.assignees && <p className="error fade-in">{errors.assignees}</p>}
+                  </div>
+                )}
+
+                {assignmentMode === "unassigned" && (
+                  <div className="assignment-summary">
+                    <strong>La tarea se va a crear sin responsable por ahora.</strong>
+                    <p>
+                      Va a aparecer en la vista <strong>Sin asignar</strong> para que puedas
+                      delegarla mas tarde desde el dashboard.
+                    </p>
                   </div>
                 )}
               </div>
@@ -304,7 +421,17 @@ export default function CreateTask() {
 
             {!formData.is_urgent && !formData.is_important && (
               <p className="subtle form-hint fade-in">
-                Esta tarea se ubicara en el cuadrante <strong>"Ni urgente ni importante"</strong>.
+                Esta tarea va a quedar en <strong>Q4: ni urgente ni importante</strong>.
+              </p>
+            )}
+
+            {(formData.is_urgent || formData.is_important) && (
+              <p className="subtle form-hint fade-in">
+                {formData.is_urgent && formData.is_important
+                  ? "Va directo a Q1: atencion inmediata."
+                  : formData.is_important
+                    ? "Va a Q2: trabajo importante que conviene sostener antes de que se vuelva urgente."
+                    : "Va a Q3: urgencia operativa con menor impacto estrategico."}
               </p>
             )}
 
@@ -318,7 +445,7 @@ export default function CreateTask() {
               <button type="submit" className="btn-primary" disabled={saving}>
                 {saving
                   ? "Creando..."
-                  : isSupervisor && assignmentMode !== "single"
+                  : isSupervisor && (assignmentMode === "multiple" || assignmentMode === "all")
                     ? "Crear tareas"
                     : "Crear tarea"}
               </button>

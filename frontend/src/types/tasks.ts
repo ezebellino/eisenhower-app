@@ -1,6 +1,7 @@
 export type Quadrant = 1 | 2 | 3 | 4;
 export type TaskStatus = "active" | "completed";
 export type TaskID = number;
+export type TaskRecurrence = "daily" | "weekly" | "monthly";
 
 /**
  * API model (backend)
@@ -14,6 +15,9 @@ export interface ApiTask {
   is_important: boolean;
 
   completed: boolean;
+  scheduled_for?: string | null;
+  scheduled_time?: string | null;
+  recurrence?: TaskRecurrence | null;
   assigned_to_id?: number | null;
 
   created_at: string;
@@ -34,6 +38,9 @@ export interface Task {
 
   quadrant: Quadrant;
   status: TaskStatus;
+  scheduled_for?: string | null;
+  scheduled_time?: string | null;
+  recurrence?: TaskRecurrence | null;
 
   createdAt: string;
   updatedAt: string;
@@ -58,6 +65,9 @@ export const fromApiTask = (t: ApiTask): Task => ({
 
   quadrant: toQuadrant({ is_urgent: t.is_urgent, is_important: t.is_important }),
   status: t.completed ? "completed" : "active",
+  scheduled_for: t.scheduled_for ?? null,
+  scheduled_time: t.scheduled_time ?? null,
+  recurrence: t.recurrence ?? null,
 
   createdAt: t.created_at,
   updatedAt: t.updated_at,

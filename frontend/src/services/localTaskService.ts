@@ -38,6 +38,9 @@ export type CreateTaskPayload = {
   description?: string | null;
   is_urgent: boolean;
   is_important: boolean;
+  scheduled_for?: string | null;
+  scheduled_time?: string | null;
+  recurrence?: "daily" | "weekly" | "monthly" | null;
   assigned_to_id?: number | null;
 };
 
@@ -47,6 +50,9 @@ export type UpdateTaskPayload = Partial<{
   is_urgent: boolean;
   is_important: boolean;
   completed: boolean;
+  scheduled_for: string | null;
+  scheduled_time: string | null;
+  recurrence: "daily" | "weekly" | "monthly" | null;
   assigned_to_id: number | null;
 }>;
 
@@ -72,9 +78,12 @@ export async function createTask(payload: CreateTaskPayload): Promise<Task> {
     description: payload.description ?? undefined,
     is_urgent: payload.is_urgent,
     is_important: payload.is_important,
+    scheduled_for: payload.scheduled_for ?? null,
+    scheduled_time: payload.scheduled_time ?? null,
+    recurrence: payload.recurrence ?? null,
     createdAt: nowISO(),
     updatedAt: nowISO(),
-    assigned_to_id: null,
+    assigned_to_id: payload.assigned_to_id ?? null,
     status: "active",
   } as any);
 
@@ -102,6 +111,12 @@ export async function updateTask(id: TaskID, patch: UpdateTaskPayload): Promise<
       patch.description === null ? undefined : patch.description ?? current.description,
     is_urgent: patch.is_urgent ?? current.is_urgent,
     is_important: patch.is_important ?? current.is_important,
+    scheduled_for:
+      patch.scheduled_for === undefined ? current.scheduled_for ?? null : patch.scheduled_for,
+    scheduled_time:
+      patch.scheduled_time === undefined ? current.scheduled_time ?? null : patch.scheduled_time,
+    recurrence:
+      patch.recurrence === undefined ? current.recurrence ?? null : patch.recurrence,
     status: completed ? "completed" : "active",
     updatedAt: nowISO(),
     assigned_to_id: patch.assigned_to_id ?? current.assigned_to_id ?? null,
