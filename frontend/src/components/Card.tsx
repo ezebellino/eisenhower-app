@@ -1,6 +1,7 @@
+import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import "../../styles/Card.css";
 import type { Task, TaskID } from "../types/tasks";
+import "../../styles/Card.css";
 
 type Props = {
   task: Task;
@@ -8,20 +9,31 @@ type Props = {
   onDelete: (id: TaskID) => Promise<void> | void;
   onUncomplete?: (id: TaskID) => Promise<void> | void;
   showOnlyCompletedActions?: boolean;
-  index?: number;
 };
 
-function quadrantLabel(q: Task["quadrant"]): string {
-  switch (q) {
+function quadrantLabel(quadrant: Task["quadrant"]) {
+  switch (quadrant) {
     case 1:
-      return "🟥 Urgente e Importante";
+      return "Urgente e importante";
     case 2:
-      return "🟧 Importante, no urgente";
+      return "Importante, no urgente";
     case 3:
-      return "🟦 Urgente, no importante";
+      return "Urgente, no importante";
     case 4:
-      return "🟩 Ni urgente ni importante";
+      return "Ni urgente ni importante";
   }
+}
+
+function formatDate(value: string) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return "Reciente";
+  }
+
+  return new Intl.DateTimeFormat("es-AR", {
+    day: "2-digit",
+    month: "short",
+  }).format(date);
 }
 
 export default function Card({
@@ -30,58 +42,58 @@ export default function Card({
   onDelete,
   onUncomplete,
   showOnlyCompletedActions = false,
-  index = 0,
 }: Props) {
-  const offsetY = index * 10;
-  const offsetX = index * 5;
-
   const isCompleted = task.status === "completed";
 
   return (
-    <motion.div
-      className={showOnlyCompletedActions ? "card-3d card-stack" : "card-3d"}
-      initial={{ opacity: 0, y: 20 }}
-      animate={{
-        opacity: 1,
-        y: 0,
-        transform: `translate(${offsetX}px, ${offsetY}px)`,
-        zIndex: 100 - index,
-      }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.3 }}
+    <motion.article
+      className="card-3d"
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -8 }}
+      transition={{ duration: 0.24, ease: "easeOut" }}
     >
-      <h3>{task.title}</h3>
-      {task.description && <p>{task.description}</p>}
-
-      <div className="card-meta">
-        <span className="badge badge-muted">
-          {quadrantLabel(task.quadrant)}
-        </span>
-
-        <span
-          className={`badge ${isCompleted ? "badge-success" : "badge-danger"
-            }`}
-        >
-          {isCompleted ? "✔️ Completada" : "⏳ Pendiente"}
+      <div className="card-topline">
+        <span className="card-date">Actualizada {formatDate(task.updatedAt)}</span>
+        <span className={`card-state ${isCompleted ? "is-success" : "is-pending"}`}>
+          {isCompleted ? "Completada" : "Pendiente"}
         </span>
       </div>
 
+      <div className="card-heading">
+        <h3>{task.title}</h3>
+        <p>{task.description || "Sin descripcion adicional."}</p>
+      </div>
 
-      {!isCompleted && !showOnlyCompletedActions && onComplete && (
-        <button onClick={() => onComplete(task.id)} className="btn-completar">
-          Marcar como completada
+      <div className="card-meta">
+        <span className="badge badge-muted">{quadrantLabel(task.quadrant)}</span>
+        {task.is_important && <span className="badge">Impacto alto</span>}
+        {task.is_urgent && <span className="badge">Atencion hoy</span>}
+      </div>
+
+      <div className="card-actions">
+        {!isCompleted && !showOnlyCompletedActions && onComplete && (
+          <button onClick={() => onComplete(task.id)} className="btn-completar" type="button">
+            Marcar como completada
+          </button>
+        )}
+
+        {isCompleted && showOnlyCompletedActions && onUncomplete && (
+          <button onClick={() => onUncomplete(task.id)} className="btn-revertir" type="button">
+            Reabrir tarea
+          </button>
+        )}
+
+        {!showOnlyCompletedActions && (
+          <Link to={`/tasks/${task.id}/edit`} className="btn-secondary card-link">
+            Editar
+          </Link>
+        )}
+
+        <button onClick={() => onDelete(task.id)} className="btn-eliminar" type="button">
+          Eliminar
         </button>
-      )}
-
-      {isCompleted && showOnlyCompletedActions && onUncomplete && (
-        <button onClick={() => onUncomplete(task.id)} className="btn-revertir">
-          Ups! Debo actualizar la tarea
-        </button>
-      )}
-
-      <button onClick={() => onDelete(task.id)} className="btn-eliminar">
-        Eliminar
-      </button>
-    </motion.div>
+      </div>
+    </motion.article>
   );
 }

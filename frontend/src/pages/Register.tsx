@@ -2,6 +2,8 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { register, login } from "../services/authService";
 import { useAuth } from "../auth/AuthContext";
+import { showErrorAlert, showInfoAlert, showSuccessToast } from "../services/alertService";
+import { migrateLocalTasksToAccount } from "../services/taskMigrationService";
 import "../../styles/Register.css";
 
 export default function Register() {
@@ -35,11 +37,23 @@ export default function Register() {
 
       // 2) opcional: loguear automáticamente
       await login({ username: u, password });
+      const migratedCount = await migrateLocalTasksToAccount();
       await refreshMe();
+
+      if (migratedCount > 0) {
+        await showInfoAlert(
+          "Cuenta lista",
+          `Tu cuenta se creó y se migraron ${migratedCount} tarea${migratedCount === 1 ? "" : "s"} local${migratedCount === 1 ? "" : "es"}.`
+        );
+      } else {
+        await showSuccessToast("Cuenta creada correctamente");
+      }
 
       navigate("/tasks");
     } catch (e: any) {
-      setErr(e?.message ?? "No se pudo crear la cuenta.");
+      const message = e?.message ?? "No se pudo crear la cuenta.";
+      setErr(message);
+      await showErrorAlert("No pudimos crear la cuenta", message);
     } finally {
       setLoading(false);
     }

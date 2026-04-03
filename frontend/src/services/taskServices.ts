@@ -1,65 +1,56 @@
-import type { ApiTask, Task, TaskID } from "../types/tasks";
-import { fromApiTask } from "../types/tasks";
-import { fetchJson } from "./api";
+import type { Task, TaskID } from "../types/tasks";
+import { getToken } from "./api";
 
-export interface CreateTaskPayload {
-  title: string;
-  description?: string | null;
-  is_urgent: boolean;
-  is_important: boolean;
-  assigned_to_id?: number | null;
+import * as api from "./apiTaskService";
+import * as local from "./localTaskService";
+
+/**
+ * Si hay token => API
+ * Si NO hay token => Local
+ */
+function useApi(): boolean {
+  return Boolean(getToken());
 }
 
-export interface UpdateTaskPayload {
-  title?: string;
-  description?: string | null;
-  is_urgent?: boolean;
-  is_important?: boolean;
-  completed?: boolean;
-  assigned_to_id?: number | null;
+// Re-exportá tipos para que tus páginas sigan importando desde taskServices
+export type CreateTaskPayload = local.CreateTaskPayload;
+export type UpdateTaskPayload = local.UpdateTaskPayload;
+
+export async function getAllTasks(): Promise<Task[]> {
+  return useApi() ? api.getAllTasks() : local.getAllTasks();
 }
 
-export const getAllTasks = async (): Promise<Task[]> => {
-  const apiTasks = await fetchJson<ApiTask[]>("/tasks/", { method: "GET" });
-  return apiTasks.map(fromApiTask);
-};
+export async function getCompletedTasks(): Promise<Task[]> {
+  return useApi() ? api.getCompletedTasks() : local.getCompletedTasks();
+}
 
-export const getCompletedTasks = async (): Promise<Task[]> => {
-  const apiTasks = await fetchJson<ApiTask[]>("/tasks/completed/", { method: "GET" });
-  return apiTasks.map(fromApiTask);
-};
+export async function getPendingTasks(): Promise<Task[]> {
+  return useApi() ? api.getPendingTasks() : local.getPendingTasks();
+}
 
-export const getTaskById = async (id: TaskID): Promise<Task> => {
-  const apiTask = await fetchJson<ApiTask>(`/tasks/${id}`, { method: "GET" });
-  return fromApiTask(apiTask);
-};
+export async function createTask(payload: CreateTaskPayload): Promise<void> {
+  return useApi() ? api.createTask(payload) : (async () => { await local.createTask(payload); })();
+}
 
-export const createTask = async (payload: CreateTaskPayload): Promise<Task> => {
-  const apiTask = await fetchJson<ApiTask>("/tasks/", {
-    method: "POST",
-    body: JSON.stringify(payload),
-  });
-  return fromApiTask(apiTask);
-};
+export async function updateTask(id: TaskID, patch: UpdateTaskPayload): Promise<void> {
+  return useApi() ? api.updateTask(id, patch) : (async () => { await local.updateTask(id, patch); })();
+}
 
-export const updateTask = async (id: TaskID, payload: UpdateTaskPayload): Promise<Task> => {
-  const apiTask = await fetchJson<ApiTask>(`/tasks/${id}`, {
-    method: "PUT",
-    body: JSON.stringify(payload),
-  });
-  return fromApiTask(apiTask);
-};
+export async function deleteTask(id: TaskID): Promise<void> {
+  return useApi() ? api.deleteTask(id) : local.deleteTask(id);
+}
 
-export const completeTask = async (id: TaskID): Promise<Task> => {
-  const apiTask = await fetchJson<ApiTask>(`/tasks/${id}/complete`, { method: "PATCH" });
-  return fromApiTask(apiTask);
-};
+export async function completeTask(id: TaskID): Promise<void> {
+  return useApi() ? api.completeTask(id) : local.completeTask(id);
+}
 
-export const uncompleteTask = async (id: TaskID): Promise<Task> => {
-  const apiTask = await fetchJson<ApiTask>(`/tasks/${id}/uncomplete`, { method: "PATCH" });
-  return fromApiTask(apiTask);
-};
+export async function uncompleteTask(id: TaskID): Promise<void> {
+  return useApi() ? api.uncompleteTask(id) : local.uncompleteTask(id);
+}
 
-export const deleteTask = async (id: TaskID): Promise<void> => {
-  await fetchJson<{ detail: string }>(`/tasks/${id}`, { method: "DELETE" });
-};
+export async function getTaskById(id: TaskID): Promise<Task> {
+  const tasks = await getAllTasks();
+  const task = tasks.find((t) => t.id === Number(id));
+  if (!task) throw new Error("Task not found");
+  return task;
+}

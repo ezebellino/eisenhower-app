@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { getTaskById, updateTask } from "../services/taskServices";
+import { showErrorAlert, showSuccessToast } from "../services/alertService";
 import type { Task } from "../types/tasks";
-
+import "../../styles/formAnimation.css";
+import "../../styles/formStyle.css";
 
 export default function EditTask() {
   const { id } = useParams();
@@ -11,16 +13,17 @@ export default function EditTask() {
 
   const [task, setTask] = useState<Task | null>(null);
   const [title, setTitle] = useState("");
-  const [description, setDescription] = useState<string>("");
+  const [description, setDescription] = useState("");
   const [isUrgent, setIsUrgent] = useState(false);
   const [isImportant, setIsImportant] = useState(false);
-  const [err, setErr] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     (async () => {
       try {
         if (!Number.isFinite(taskId) || taskId <= 0) {
-          setErr("ID inválido");
+          setError("No pudimos identificar la tarea.");
           return;
         }
 
@@ -30,15 +33,16 @@ export default function EditTask() {
         setDescription(found.description ?? "");
         setIsUrgent(found.is_urgent);
         setIsImportant(found.is_important);
-      } catch (e: any) {
-        setErr(e?.message ?? "Error cargando tarea");
+      } catch (err: any) {
+        setError(err?.message ?? "Error cargando la tarea.");
       }
     })();
   }, [taskId]);
 
-  const onSave = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setErr(null);
+  const onSave = async (event: React.FormEvent) => {
+    event.preventDefault();
+    setError(null);
+    setSaving(true);
 
     try {
       await updateTask(taskId, {
@@ -48,71 +52,100 @@ export default function EditTask() {
         is_important: isImportant,
       });
 
-      navigate("/");
-    } catch (e: any) {
-      setErr(e?.message ?? "Error guardando cambios");
+      await showSuccessToast("Tarea actualizada");
+      navigate("/tasks");
+    } catch (err: any) {
+      const message = err?.message ?? "Error guardando cambios.";
+      setError(message);
+      await showErrorAlert("No pudimos guardar los cambios", message);
+    } finally {
+      setSaving(false);
     }
   };
 
-  if (err) {
+  if (error && !task) {
     return (
-      <div className="container" style={{ maxWidth: 640 }}>
-        <h1 className="page-title">Editar tarea</h1>
-        <p className="error">{err}</p>
+      <div className="page container">
+        <div className="form-page">
+          <div className="form-card">
+            <h2>Editar tarea</h2>
+            <p className="error">{error}</p>
+          </div>
+        </div>
       </div>
     );
   }
 
   if (!task) {
-    return <div className="container" style={{ padding: 24 }}>Cargando...</div>;
+    return (
+      <div className="page container">
+        <div className="form-page">
+          <div className="form-card">
+            <h2>Cargando tarea...</h2>
+            <p className="subtle">Estamos preparando la información para que puedas editarla.</p>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="container" style={{ maxWidth: 640 }}>
-      <h1 className="page-title">Editar tarea</h1>
+    <div className="page container">
+      <div className="form-page">
+        <div className="form-card">
+          <h2>Editar tarea</h2>
+          <p className="subtle form-subtitle">
+            Ajustá el contenido o cambiá su prioridad para reubicarla en la matriz.
+          </p>
 
-      <form onSubmit={onSave} className="panel" style={{ padding: 16 }}>
-        <label>Título</label>
-        <input
-          className="form-input"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-        />
+          <form onSubmit={onSave} id="task-form">
+            <div className="form-field">
+              <label>Titulo</label>
+              <input className="form-input" value={title} onChange={(e) => setTitle(e.target.value)} />
+            </div>
 
-        <label style={{ marginTop: 10 }}>Descripción</label>
-        <textarea
-          className="form-textarea"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-        />
+            <div className="form-field">
+              <label>Descripcion</label>
+              <textarea
+                className="form-textarea"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+              />
+            </div>
 
-        <div style={{ marginTop: 10, display: "flex", gap: 14, flexWrap: "wrap" }}>
-          <label>
-            <input
-              type="checkbox"
-              checked={isUrgent}
-              onChange={(e) => setIsUrgent(e.target.checked)}
-            />
-            Urgente
-          </label>
+            <div className="form-checks">
+              <label className="check">
+                <input
+                  type="checkbox"
+                  checked={isUrgent}
+                  onChange={(e) => setIsUrgent(e.target.checked)}
+                />
+                <span>Urgente</span>
+              </label>
 
-          <label>
-            <input
-              type="checkbox"
-              checked={isImportant}
-              onChange={(e) => setIsImportant(e.target.checked)}
-            />
-            Importante
-          </label>
+              <label className="check">
+                <input
+                  type="checkbox"
+                  checked={isImportant}
+                  onChange={(e) => setIsImportant(e.target.checked)}
+                />
+                <span>Importante</span>
+              </label>
+            </div>
+
+            {error && <p className="error">{error}</p>}
+
+            <div className="form-actions">
+              <button type="button" className="btn-ghost" onClick={() => navigate("/tasks")}>
+                Cancelar
+              </button>
+              <button type="submit" className="btn-primary" disabled={saving}>
+                {saving ? "Guardando..." : "Guardar cambios"}
+              </button>
+            </div>
+          </form>
         </div>
-
-        <div style={{ marginTop: 12, display: "flex", gap: 10 }}>
-          <button type="submit">Guardar</button>
-          <button type="button" onClick={() => navigate("/")}>
-            Cancelar
-          </button>
-        </div>
-      </form>
+      </div>
     </div>
   );
 }
