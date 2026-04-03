@@ -13,6 +13,10 @@ La app combina una experiencia personal de gestion de tareas con una capa de sup
 ## Current Features
 
 - Creacion de tareas con titulo, descripcion y prioridad.
+- Programacion de tareas por fecha y horario.
+- Recurrencia diaria, semanal y mensual.
+- Vista Agenda con enfoque mensual y operativo por dia.
+- Recordatorios locales del navegador para tareas del dia.
 - Clasificacion automatica en los 4 cuadrantes de Eisenhower.
 - Dashboard visual con una tarjeta activa por cuadrante y navegacion interna.
 - Historial de tareas completadas con opcion de reabrir.
@@ -22,10 +26,12 @@ La app combina una experiencia personal de gestion de tareas con una capa de sup
 - Autenticacion con cuentas y persistencia de tareas en backend.
 - Migracion automatica de tareas locales al iniciar sesion o registrarse.
 - Diferenciacion clara entre modo invitado y cuenta activa.
+- Base PWA instalable para uso movil.
 - Herramientas de supervisor:
   - asignar tareas a una persona
   - crear tareas para varias personas
   - crear tareas para todo el staff
+  - crear tareas sin responsable para delegarlas mas tarde
   - duplicar tareas rapidamente para otras personas o todo el staff
   - filtrar por alcance: todas, propias, equipo, sin asignar
   - ver carga del equipo por persona
@@ -36,7 +42,7 @@ La app combina una experiencia personal de gestion de tareas con una capa de sup
 ### Usuario
 
 - Gestiona sus propias tareas.
-- Ve su dashboard personal y su historial.
+- Ve su dashboard personal, su agenda y su historial.
 - Trabaja con foco individual.
 
 ### Supervisor
@@ -57,6 +63,7 @@ La app combina una experiencia personal de gestion de tareas con una capa de sup
 - Framer Motion
 - SweetAlert2
 - CSS con sistema visual propio
+- Base PWA instalable
 
 ### Backend
 
@@ -68,13 +75,14 @@ La app combina una experiencia personal de gestion de tareas con una capa de sup
 
 ```text
 EisenhowerApp/
-├── frontend/
-│   ├── src/
-│   └── styles/
-├── backend/
-│   ├── app/
-│   └── ...
-└── README.md
+|-- frontend/
+|   |-- public/
+|   |-- src/
+|   `-- styles/
+|-- backend/
+|   |-- app/
+|   `-- ...
+`-- README.md
 ```
 
 ## Local Setup
@@ -101,17 +109,41 @@ cd backend
 uvicorn main:app --reload
 ```
 
+## Install on Mobile
+
+La app ya tiene una base PWA para poder instalarse como acceso directo cuando este publicada por `https`.
+
+### iPhone / iPad (Safari)
+
+1. Abre la URL publicada en Safari.
+2. Toca el boton `Compartir`.
+3. Elige `Agregar a pantalla de inicio`.
+4. Confirma el nombre y toca `Agregar`.
+
+### Android (Chrome)
+
+1. Abre la URL publicada en Chrome.
+2. Si aparece el aviso de instalacion, toca `Instalar app`.
+3. Si no aparece, abre el menu de Chrome.
+4. Elige `Instalar aplicacion` o `Agregar a pantalla de inicio`.
+
+### Notes
+
+- Para instalarla, la app debe estar desplegada con `https`.
+- En desarrollo local, algunas funciones PWA pueden no comportarse igual.
+- Los recordatorios actuales son locales del navegador; no son push notifications nativas todavia.
+
 ## Product Direction
 
-La app ya funciona como una herramienta personal de prioridades, pero su diferencial mas fuerte esta creciendo en la capa de supervision y coordinacion.
+La app ya funciona como una herramienta personal de prioridades, pero su diferencial mas fuerte esta creciendo en la capa de supervision, agenda personal y coordinacion.
 
 Proximos pasos naturales:
 
-- acciones mas rapidas de reasignacion desde cards o paneles
-- mejor visibilidad de carga operativa por equipo
-- vistas mas fuertes para seguimiento de tareas sin asignar
-- mejoras de accesibilidad y atajos de uso
-- evolucion de persistencia y despliegue productivo
+- reforzar la experiencia PWA e instalacion movil
+- sumar mas inteligencia en la agenda diaria
+- evolucionar recordatorios locales hacia notificaciones mas robustas
+- mejorar accesibilidad, rendimiento y atajos de uso
+- consolidar despliegue productivo
 
 ## Author
 
