@@ -327,6 +327,9 @@ export default function Home() {
   const q1TeamRisk = user
     ? activeTasks.filter((task) => task.quadrant === 1 && task.assigned_to_id !== user.id).length
     : 0;
+  const unassignedCriticalTasks = activeTasks.filter(
+    (task) => task.assigned_to_id == null && task.quadrant === 1
+  ).length;
   const completedThisWeek = completedTasks.filter((task) => isWithinLastDays(task.updatedAt, 7)).length;
   const touchedThisWeek = tasks.filter((task) => isWithinLastDays(task.updatedAt, 7)).length;
   const weeklyCompletionRate =
@@ -630,7 +633,9 @@ export default function Home() {
                     </div>
                   </div>
 
-                  <aside className="unassigned-queue panel">
+                  <aside
+                    className={`unassigned-queue panel ${unassignedTasks > 0 ? "is-pending" : "is-clear"} ${unassignedCriticalTasks > 0 ? "has-critical" : ""}`}
+                  >
                     <div className="unassigned-queue__header">
                       <div>
                         <p className="team-load__eyebrow">Bandeja sin asignar</p>
@@ -642,7 +647,9 @@ export default function Home() {
                     <p className="unassigned-queue__summary">
                       {unassignedTasks === 0
                         ? "No hay tareas sueltas ahora mismo. Buena senal de control operativo."
-                        : "Prioriza esta bandeja para que nada importante quede sin responsable."}
+                        : unassignedCriticalTasks > 0
+                          ? `${unassignedCriticalTasks} tareas criticas siguen sin responsable. Conviene resolver esto primero.`
+                          : "Prioriza esta bandeja para que nada importante quede sin responsable."}
                     </p>
 
                     {unassignedQueue.length > 0 ? (
@@ -694,9 +701,6 @@ export default function Home() {
                       >
                         Abrir vista sin asignar
                       </button>
-                      <Link to="/tasks/create" className="btn-ghost">
-                        Crear tarea
-                      </Link>
                     </div>
                   </aside>
                 </div>
@@ -715,18 +719,16 @@ export default function Home() {
                   <div>
                     <p>Modo supervisor activo.</p>
                     <small>
-                      Hoy ya podes crear, asignar y monitorear el trabajo del equipo desde este
-                      mismo dashboard.
+                      {unassignedTasks > 0
+                        ? `Tienes ${unassignedTasks} tareas esperando responsable. Este es el mejor punto para ordenar la carga del equipo.`
+                        : "Hoy ya podes crear, asignar y monitorear el trabajo del equipo desde este mismo dashboard."}
                     </small>
                   </div>
 
                   <div className="matrix-banner__actions">
-                    <Link to="/tasks/create" className="btn-primary">
-                      Crear y asignar tarea
-                    </Link>
                     <button
                       type="button"
-                      className="btn-ghost"
+                      className="btn-primary"
                       onClick={() => setSupervisorScope("unassigned")}
                     >
                       Ver sin asignar
@@ -779,7 +781,7 @@ export default function Home() {
 
                   <article className="supervisor-onboarding__step">
                     <span>3</span>
-                    <strong>Vacía la bandeja</strong>
+                    <strong>Vacia la bandeja</strong>
                     <p>Revisa primero las tareas sin asignar para que nada importante quede sin responsable.</p>
                     <button
                       type="button"

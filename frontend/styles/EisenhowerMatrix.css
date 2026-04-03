@@ -471,6 +471,31 @@
     rgba(255, 255, 255, 0.03);
 }
 
+.unassigned-queue.is-pending {
+  border-color: rgba(126, 169, 255, 0.26);
+  box-shadow: 0 0 1.25rem rgba(126, 169, 255, 0.12);
+}
+
+.unassigned-queue.has-critical {
+  border-color: rgba(255, 124, 146, 0.26);
+  background:
+    linear-gradient(180deg, rgba(255, 124, 146, 0.1), rgba(255, 255, 255, 0.02)),
+    rgba(255, 255, 255, 0.03);
+  box-shadow: 0 0 1.5rem rgba(255, 124, 146, 0.14);
+}
+
+.unassigned-queue.has-critical .unassigned-queue__count {
+  background: rgba(255, 124, 146, 0.16);
+  border-color: rgba(255, 124, 146, 0.28);
+  box-shadow: 0 0 1rem rgba(255, 124, 146, 0.16);
+}
+
+.unassigned-queue.is-clear .unassigned-queue__count {
+  background: rgba(81, 211, 165, 0.12);
+  border-color: rgba(81, 211, 165, 0.22);
+  box-shadow: 0 0 1rem rgba(81, 211, 165, 0.1);
+}
+
 .unassigned-queue__header {
   display: flex;
   justify-content: space-between;

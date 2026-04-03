@@ -7,7 +7,7 @@ import { listUsers, type UserSummary } from "../services/userService";
 import "../../styles/formAnimation.css";
 import "../../styles/formStyle.css";
 
-type AssignmentMode = "single" | "multiple" | "all";
+type AssignmentMode = "single" | "multiple" | "all" | "unassigned";
 type FormErrors = Partial<Record<keyof CreateTaskPayload | "general" | "assignees", string>>;
 
 export default function CreateTask() {
@@ -109,6 +109,12 @@ export default function CreateTask() {
   const handleAssignmentModeChange = (mode: AssignmentMode) => {
     setAssignmentMode(mode);
     setErrors((prev) => ({ ...prev, assigned_to_id: undefined, assignees: undefined }));
+    if (mode !== "single") {
+      setFormData((prev) => ({ ...prev, assigned_to_id: null }));
+    }
+    if (mode !== "multiple") {
+      setSelectedAssigneeIds([]);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -129,11 +135,15 @@ export default function CreateTask() {
       };
 
       const targetAssigneeIds =
-        !isSupervisor || assignmentMode === "single"
+        !isSupervisor
+          ? [formData.assigned_to_id ?? null]
+          : assignmentMode === "single"
           ? [formData.assigned_to_id ?? null]
           : assignmentMode === "multiple"
             ? selectedAssigneeIds
-            : staff.map((member) => member.id);
+            : assignmentMode === "all"
+              ? staff.map((member) => member.id)
+              : [null];
 
       let createdCount = 0;
 
@@ -165,7 +175,7 @@ export default function CreateTask() {
           <h2 id="create-task-title">Crear nueva tarea</h2>
           <p className="subtle form-subtitle">
             {isSupervisor
-              ? "Define la prioridad y deja la tarea lista para una persona, varias o todo el staff."
+              ? "Define la prioridad y decide si la tarea sale con responsable, se reparte o queda pendiente de asignacion."
               : "Define si es urgente y si es importante para ubicarla en el cuadrante correcto."}
           </p>
 
@@ -220,6 +230,13 @@ export default function CreateTask() {
                     disabled={staff.length === 0}
                   >
                     Todo el staff
+                  </button>
+                  <button
+                    type="button"
+                    className={`assignment-mode ${assignmentMode === "unassigned" ? "is-active" : ""}`}
+                    onClick={() => handleAssignmentModeChange("unassigned")}
+                  >
+                    Sin responsable
                   </button>
                 </div>
 
@@ -283,6 +300,16 @@ export default function CreateTask() {
                     {errors.assignees && <p className="error fade-in">{errors.assignees}</p>}
                   </div>
                 )}
+
+                {assignmentMode === "unassigned" && (
+                  <div className="assignment-summary">
+                    <strong>La tarea se va a crear sin responsable por ahora.</strong>
+                    <p>
+                      Va a aparecer en la vista <strong>Sin asignar</strong> para que puedas
+                      delegarla mas tarde desde el dashboard.
+                    </p>
+                  </div>
+                )}
               </div>
             )}
 
@@ -334,7 +361,7 @@ export default function CreateTask() {
               <button type="submit" className="btn-primary" disabled={saving}>
                 {saving
                   ? "Creando..."
-                  : isSupervisor && assignmentMode !== "single"
+                  : isSupervisor && (assignmentMode === "multiple" || assignmentMode === "all")
                     ? "Crear tareas"
                     : "Crear tarea"}
               </button>
