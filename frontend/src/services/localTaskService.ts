@@ -38,6 +38,7 @@ export type CreateTaskPayload = {
   description?: string | null;
   is_urgent: boolean;
   is_important: boolean;
+  assigned_to_id?: number | null;
 };
 
 export type UpdateTaskPayload = Partial<{

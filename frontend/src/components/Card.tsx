@@ -5,6 +5,7 @@ import "../../styles/Card.css";
 
 type Props = {
   task: Task;
+  assignmentLabel?: string | null;
   onComplete?: (id: TaskID) => Promise<void> | void;
   onDelete: (id: TaskID) => Promise<void> | void;
   onUncomplete?: (id: TaskID) => Promise<void> | void;
@@ -36,8 +37,22 @@ function formatDate(value: string) {
   }).format(date);
 }
 
+function quadrantToneClass(quadrant: Task["quadrant"]) {
+  switch (quadrant) {
+    case 1:
+      return "badge-q1";
+    case 2:
+      return "badge-q2";
+    case 3:
+      return "badge-q3";
+    case 4:
+      return "badge-q4";
+  }
+}
+
 export default function Card({
   task,
+  assignmentLabel,
   onComplete,
   onDelete,
   onUncomplete,
@@ -66,10 +81,19 @@ export default function Card({
       </div>
 
       <div className="card-meta">
-        <span className="badge badge-muted">{quadrantLabel(task.quadrant)}</span>
+        <span className={`badge badge-muted ${quadrantToneClass(task.quadrant)}`}>
+          {quadrantLabel(task.quadrant)}
+        </span>
         {task.is_important && <span className="badge">Impacto alto</span>}
         {task.is_urgent && <span className="badge">Atencion hoy</span>}
       </div>
+
+      {assignmentLabel && (
+        <div className="card-assignment">
+          <span className="card-assignment__label">Asignacion</span>
+          <strong>{assignmentLabel}</strong>
+        </div>
+      )}
 
       <div className="card-actions">
         {!isCompleted && !showOnlyCompletedActions && onComplete && (

@@ -61,6 +61,30 @@
   line-height: 1.5;
 }
 
+.card-assignment {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.8rem 0.95rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(126, 169, 255, 0.18);
+  background: linear-gradient(180deg, rgba(126, 169, 255, 0.12), rgba(126, 169, 255, 0.05));
+  box-shadow: 0 0 1rem rgba(126, 169, 255, 0.08);
+}
+
+.card-assignment__label {
+  color: var(--muted);
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.card-assignment strong {
+  color: var(--text);
+  font-size: 0.92rem;
+}
+
 .badge {
   display: inline-flex;
   align-items: center;
@@ -74,6 +98,30 @@
 
 .badge-muted {
   color: var(--muted-strong);
+}
+
+.badge-q1 {
+  border-color: rgba(255, 124, 146, 0.34);
+  background: rgba(255, 124, 146, 0.12);
+  box-shadow: 0 0 0 1px rgba(255, 124, 146, 0.08), 0 0 1.1rem rgba(255, 124, 146, 0.16);
+}
+
+.badge-q2 {
+  border-color: rgba(255, 179, 107, 0.34);
+  background: rgba(255, 179, 107, 0.12);
+  box-shadow: 0 0 0 1px rgba(255, 179, 107, 0.08), 0 0 1.1rem rgba(255, 179, 107, 0.14);
+}
+
+.badge-q3 {
+  border-color: rgba(126, 169, 255, 0.34);
+  background: rgba(126, 169, 255, 0.12);
+  box-shadow: 0 0 0 1px rgba(126, 169, 255, 0.08), 0 0 1.1rem rgba(126, 169, 255, 0.16);
+}
+
+.badge-q4 {
+  border-color: rgba(81, 211, 165, 0.34);
+  background: rgba(81, 211, 165, 0.12);
+  box-shadow: 0 0 0 1px rgba(81, 211, 165, 0.08), 0 0 1.1rem rgba(81, 211, 165, 0.16);
 }
 
 .card-actions {
@@ -120,6 +168,11 @@
 }
 
 @media (max-width: 640px) {
+  .card-assignment {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
   .card-actions {
     grid-template-columns: 1fr;
   }

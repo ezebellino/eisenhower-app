@@ -82,8 +82,87 @@
   background: rgba(255, 124, 146, 0.08);
 }
 
+.matrix-banner--success {
+  border-color: rgba(81, 211, 165, 0.2);
+  background: rgba(81, 211, 165, 0.08);
+}
+
+.matrix-banner--supervisor {
+  display: grid;
+  gap: 0.45rem;
+  border-color: rgba(255, 179, 107, 0.2);
+  background: rgba(255, 179, 107, 0.08);
+}
+
+.matrix-banner__stack {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.matrix-banner__actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
 .matrix-banner__action {
   justify-self: start;
+}
+
+.matrix-toolbar {
+  margin-top: 1rem;
+}
+
+.matrix-filters {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) repeat(4, minmax(0, 0.75fr));
+  gap: 0.75rem;
+}
+
+.matrix-filter {
+  display: grid;
+  gap: 0.45rem;
+  padding: 0.9rem 1rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.matrix-filter span {
+  color: var(--muted);
+  font-size: 0.76rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+.matrix-filter input,
+.matrix-filter select {
+  width: 100%;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 0.85rem;
+  padding: 0.8rem 0.9rem;
+  background: rgba(7, 17, 31, 0.68);
+  color: var(--text);
+  outline: none;
+}
+
+.matrix-filter input:focus,
+.matrix-filter select:focus {
+  border-color: var(--border-strong);
+  box-shadow: 0 0 0 0.2rem rgba(124, 182, 255, 0.14);
+}
+
+.matrix-filter--result {
+  align-content: center;
+}
+
+.matrix-filter--result strong {
+  font-size: 1.7rem;
+  line-height: 1;
+  letter-spacing: -0.05em;
 }
 
 .dashboard-summary {
@@ -208,10 +287,12 @@
 }
 
 .matrix-panel {
+  position: relative;
   display: grid;
   gap: 1rem;
   min-height: 24rem;
   padding: 1.2rem;
+  isolation: isolate;
 }
 
 .matrix-panel__header {
@@ -274,22 +355,62 @@
 
 .q1 {
   border-color: rgba(255, 124, 146, 0.18);
-  box-shadow: inset 0 1px 0 rgba(255, 124, 146, 0.1), var(--shadow-soft);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 124, 146, 0.1),
+    0 0 0 1px rgba(255, 124, 146, 0.16),
+    0 0 1.6rem rgba(255, 124, 146, 0.16),
+    var(--shadow-soft);
 }
 
 .q2 {
   border-color: rgba(255, 179, 107, 0.18);
-  box-shadow: inset 0 1px 0 rgba(255, 179, 107, 0.1), var(--shadow-soft);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 179, 107, 0.1),
+    0 0 0 1px rgba(255, 179, 107, 0.14),
+    0 0 1.6rem rgba(255, 179, 107, 0.15),
+    var(--shadow-soft);
 }
 
 .q3 {
   border-color: rgba(126, 169, 255, 0.2);
-  box-shadow: inset 0 1px 0 rgba(126, 169, 255, 0.1), var(--shadow-soft);
+  box-shadow:
+    inset 0 1px 0 rgba(126, 169, 255, 0.1),
+    0 0 0 1px rgba(126, 169, 255, 0.16),
+    0 0 1.7rem rgba(126, 169, 255, 0.17),
+    var(--shadow-soft);
 }
 
 .q4 {
   border-color: rgba(81, 211, 165, 0.18);
-  box-shadow: inset 0 1px 0 rgba(81, 211, 165, 0.1), var(--shadow-soft);
+  box-shadow:
+    inset 0 1px 0 rgba(81, 211, 165, 0.1),
+    0 0 0 1px rgba(81, 211, 165, 0.14),
+    0 0 1.7rem rgba(81, 211, 165, 0.16),
+    var(--shadow-soft);
+}
+
+.q1 .matrix-panel__count {
+  border-color: rgba(255, 124, 146, 0.28);
+  background: rgba(255, 124, 146, 0.12);
+  box-shadow: 0 0 1.2rem rgba(255, 124, 146, 0.14);
+}
+
+.q2 .matrix-panel__count {
+  border-color: rgba(255, 179, 107, 0.26);
+  background: rgba(255, 179, 107, 0.12);
+  box-shadow: 0 0 1.2rem rgba(255, 179, 107, 0.12);
+}
+
+.q3 .matrix-panel__count {
+  border-color: rgba(126, 169, 255, 0.28);
+  background: rgba(126, 169, 255, 0.12);
+  box-shadow: 0 0 1.2rem rgba(126, 169, 255, 0.14);
+}
+
+.q4 .matrix-panel__count {
+  border-color: rgba(81, 211, 165, 0.26);
+  background: rgba(81, 211, 165, 0.12);
+  box-shadow: 0 0 1.2rem rgba(81, 211, 165, 0.13);
 }
 
 .arrow-controls {
@@ -336,6 +457,10 @@
   .dashboard-summary__grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+
+  .matrix-filters {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 640px) {
@@ -348,6 +473,10 @@
   }
 
   .dashboard-summary__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .matrix-filters {
     grid-template-columns: 1fr;
   }
 
