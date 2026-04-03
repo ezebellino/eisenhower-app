@@ -9,6 +9,7 @@ type Props = {
   onComplete?: (id: TaskID) => Promise<void> | void;
   onDelete: (id: TaskID) => Promise<void> | void;
   onUncomplete?: (id: TaskID) => Promise<void> | void;
+  onDuplicate?: (task: Task) => Promise<void> | void;
   showOnlyCompletedActions?: boolean;
 };
 
@@ -56,6 +57,7 @@ export default function Card({
   onComplete,
   onDelete,
   onUncomplete,
+  onDuplicate,
   showOnlyCompletedActions = false,
 }: Props) {
   const isCompleted = task.status === "completed";
@@ -112,6 +114,12 @@ export default function Card({
           <Link to={`/tasks/${task.id}/edit`} className="btn-secondary card-link">
             Editar
           </Link>
+        )}
+
+        {!showOnlyCompletedActions && onDuplicate && (
+          <button onClick={() => onDuplicate(task)} className="btn-duplicate" type="button">
+            Duplicar para otros
+          </button>
         )}
 
         <button onClick={() => onDelete(task.id)} className="btn-eliminar" type="button">

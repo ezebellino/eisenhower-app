@@ -7,7 +7,8 @@ import { listUsers, type UserSummary } from "../services/userService";
 import "../../styles/formAnimation.css";
 import "../../styles/formStyle.css";
 
-type FormErrors = Partial<Record<keyof CreateTaskPayload | "general", string>>;
+type AssignmentMode = "single" | "multiple" | "all";
+type FormErrors = Partial<Record<keyof CreateTaskPayload | "general" | "assignees", string>>;
 
 export default function CreateTask() {
   const navigate = useNavigate();
@@ -15,6 +16,8 @@ export default function CreateTask() {
   const isSupervisor = user?.role === "supervisor";
   const [staff, setStaff] = useState<UserSummary[]>([]);
   const [loadingStaff, setLoadingStaff] = useState(false);
+  const [assignmentMode, setAssignmentMode] = useState<AssignmentMode>("single");
+  const [selectedAssigneeIds, setSelectedAssigneeIds] = useState<number[]>([]);
 
   const [formData, setFormData] = useState<CreateTaskPayload>({
     title: "",
@@ -60,8 +63,18 @@ export default function CreateTask() {
       newErrors.description = "La descripcion debe tener al menos 5 caracteres";
     }
 
-    if (isSupervisor && !formData.assigned_to_id) {
-      newErrors.assigned_to_id = "Selecciona una persona del staff";
+    if (isSupervisor) {
+      if (assignmentMode === "single" && !formData.assigned_to_id) {
+        newErrors.assigned_to_id = "Selecciona una persona del staff";
+      }
+
+      if (assignmentMode === "multiple" && selectedAssigneeIds.length === 0) {
+        newErrors.assignees = "Selecciona al menos una persona del staff";
+      }
+
+      if (assignmentMode === "all" && staff.length === 0) {
+        newErrors.assignees = "No hay personas activas disponibles para asignar";
+      }
     }
 
     return newErrors;
@@ -85,6 +98,19 @@ export default function CreateTask() {
     }));
   };
 
+  const toggleAssignee = (assigneeId: number) => {
+    setSelectedAssigneeIds((prev) =>
+      prev.includes(assigneeId)
+        ? prev.filter((currentId) => currentId !== assigneeId)
+        : [...prev, assigneeId]
+    );
+  };
+
+  const handleAssignmentModeChange = (mode: AssignmentMode) => {
+    setAssignmentMode(mode);
+    setErrors((prev) => ({ ...prev, assigned_to_id: undefined, assignees: undefined }));
+  };
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
@@ -95,8 +121,33 @@ export default function CreateTask() {
     setSaving(true);
 
     try {
-      await createTask(formData);
-      await showSuccessToast("Tarea creada correctamente");
+      const basePayload: CreateTaskPayload = {
+        title: formData.title.trim(),
+        description: formData.description?.trim() ? formData.description.trim() : "",
+        is_urgent: formData.is_urgent,
+        is_important: formData.is_important,
+      };
+
+      const targetAssigneeIds =
+        !isSupervisor || assignmentMode === "single"
+          ? [formData.assigned_to_id ?? null]
+          : assignmentMode === "multiple"
+            ? selectedAssigneeIds
+            : staff.map((member) => member.id);
+
+      let createdCount = 0;
+
+      for (const assigneeId of targetAssigneeIds) {
+        await createTask({
+          ...basePayload,
+          assigned_to_id: assigneeId,
+        });
+        createdCount += 1;
+      }
+
+      await showSuccessToast(
+        createdCount > 1 ? `${createdCount} tareas creadas correctamente` : "Tarea creada correctamente"
+      );
       navigate("/tasks");
     } catch (error: any) {
       const message = error?.message ?? "No se pudo crear la tarea.";
@@ -146,23 +197,86 @@ export default function CreateTask() {
 
             {isSupervisor && (
               <div className="form-field">
-                <label className={errors.assigned_to_id ? "label-shake" : ""}>Asignar a</label>
-                <select
-                  className={`form-input ${errors.assigned_to_id ? "input-error shake" : ""}`}
-                  value={formData.assigned_to_id ?? ""}
-                  onChange={handleAssigneeChange}
-                  disabled={loadingStaff}
-                >
-                  <option value="">
-                    {loadingStaff ? "Cargando staff..." : "Seleccionar persona"}
-                  </option>
-                  {staff.map((member) => (
-                    <option key={member.id} value={member.id}>
-                      {member.username} {member.role === "supervisor" ? "(Supervisor)" : ""}
-                    </option>
-                  ))}
-                </select>
-                {errors.assigned_to_id && <p className="error fade-in">{errors.assigned_to_id}</p>}
+                <label>Modo de asignacion</label>
+                <div className="assignment-modes">
+                  <button
+                    type="button"
+                    className={`assignment-mode ${assignmentMode === "single" ? "is-active" : ""}`}
+                    onClick={() => handleAssignmentModeChange("single")}
+                  >
+                    Una persona
+                  </button>
+                  <button
+                    type="button"
+                    className={`assignment-mode ${assignmentMode === "multiple" ? "is-active" : ""}`}
+                    onClick={() => handleAssignmentModeChange("multiple")}
+                  >
+                    Varias personas
+                  </button>
+                  <button
+                    type="button"
+                    className={`assignment-mode ${assignmentMode === "all" ? "is-active" : ""}`}
+                    onClick={() => handleAssignmentModeChange("all")}
+                    disabled={staff.length === 0}
+                  >
+                    Todo el staff
+                  </button>
+                </div>
+
+                {assignmentMode === "single" && (
+                  <>
+                    <label className={errors.assigned_to_id ? "label-shake" : ""}>Asignar a</label>
+                    <select
+                      className={`form-input ${errors.assigned_to_id ? "input-error shake" : ""}`}
+                      value={formData.assigned_to_id ?? ""}
+                      onChange={handleAssigneeChange}
+                      disabled={loadingStaff}
+                    >
+                      <option value="">
+                        {loadingStaff ? "Cargando staff..." : "Seleccionar persona"}
+                      </option>
+                      {staff.map((member) => (
+                        <option key={member.id} value={member.id}>
+                          {member.username} {member.role === "supervisor" ? "(Supervisor)" : ""}
+                        </option>
+                      ))}
+                    </select>
+                    {errors.assigned_to_id && <p className="error fade-in">{errors.assigned_to_id}</p>}
+                  </>
+                )}
+
+                {assignmentMode === "multiple" && (
+                  <>
+                    <label className={errors.assignees ? "label-shake" : ""}>Asignar a varias personas</label>
+                    <div className={`staff-selector ${errors.assignees ? "input-error" : ""}`}>
+                      {staff.map((member) => (
+                        <label key={member.id} className="staff-selector__item">
+                          <input
+                            type="checkbox"
+                            checked={selectedAssigneeIds.includes(member.id)}
+                            onChange={() => toggleAssignee(member.id)}
+                          />
+                          <span>
+                            {member.username} {member.role === "supervisor" ? "(Supervisor)" : ""}
+                          </span>
+                        </label>
+                      ))}
+                    </div>
+                    {errors.assignees && <p className="error fade-in">{errors.assignees}</p>}
+                  </>
+                )}
+
+                {assignmentMode === "all" && (
+                  <div className="assignment-summary">
+                    <strong>Se creara una copia para cada persona activa del staff.</strong>
+                    <p>
+                      {loadingStaff
+                        ? "Cargando staff..."
+                        : `${staff.length} personas recibiran una tarea individual para seguimiento propio.`}
+                    </p>
+                    {errors.assignees && <p className="error fade-in">{errors.assignees}</p>}
+                  </div>
+                )}
               </div>
             )}
 
@@ -202,7 +316,11 @@ export default function CreateTask() {
               </button>
 
               <button type="submit" className="btn-primary" disabled={saving}>
-                {saving ? "Creando..." : "Crear tarea"}
+                {saving
+                  ? "Creando..."
+                  : isSupervisor && assignmentMode !== "single"
+                    ? "Crear tareas"
+                    : "Crear tarea"}
               </button>
             </div>
           </form>
