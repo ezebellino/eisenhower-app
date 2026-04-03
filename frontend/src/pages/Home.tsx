@@ -64,6 +64,13 @@ function sortTasks(tasks: Task[], sortBy: SortOption) {
   return sorted;
 }
 
+function isWithinLastDays(value: string, days: number) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return false;
+  const diff = Date.now() - date.getTime();
+  return diff <= days * 24 * 60 * 60 * 1000;
+}
+
 export default function Home() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [isLoadingTasks, setIsLoadingTasks] = useState(true);
@@ -284,6 +291,7 @@ export default function Home() {
   };
 
   const activeTasks = tasks.filter((task) => task.status === "active");
+  const completedTasks = tasks.filter((task) => task.status === "completed");
   const criticalTasks = activeTasks.filter((task) => task.quadrant === 1).length;
   const strategicTasks = activeTasks.filter((task) => task.quadrant === 2).length;
   const reactiveTasks = activeTasks.filter((task) => task.quadrant === 3).length;
@@ -303,6 +311,16 @@ export default function Home() {
   const q1TeamRisk = user
     ? activeTasks.filter((task) => task.quadrant === 1 && task.assigned_to_id !== user.id).length
     : 0;
+  const completedThisWeek = completedTasks.filter((task) => isWithinLastDays(task.updatedAt, 7)).length;
+  const touchedThisWeek = tasks.filter((task) => isWithinLastDays(task.updatedAt, 7)).length;
+  const weeklyCompletionRate =
+    touchedThisWeek === 0 ? 0 : Math.round((completedThisWeek / touchedThisWeek) * 100);
+  const assignmentCoverage =
+    activeTasks.length === 0
+      ? 100
+      : Math.round(((activeTasks.length - unassignedTasks) / activeTasks.length) * 100);
+  const strategicShare =
+    activeTasks.length === 0 ? 0 : Math.round((strategicTasks / activeTasks.length) * 100);
 
   const dashboardHighlights =
     user?.role === "supervisor"
@@ -372,6 +390,43 @@ export default function Home() {
             value: `${focusRatio}%`,
             helper: `Ultima actualizacion ${getLatestUpdate(activeTasks)}`,
             tone: "is-focus",
+          },
+        ];
+
+  const dashboardInsights =
+    user?.role === "supervisor"
+      ? [
+          {
+            label: "Cierres semanales",
+            value: String(completedThisWeek),
+            helper: completedThisWeek === 0 ? "Todavia no hubo cierres en 7 dias" : "Tareas completadas en los ultimos 7 dias",
+          },
+          {
+            label: "Cobertura",
+            value: `${assignmentCoverage}%`,
+            helper: "Porcentaje de tareas activas que ya tienen responsable",
+          },
+          {
+            label: "Ritmo de cierre",
+            value: `${weeklyCompletionRate}%`,
+            helper: "Relacion entre actividad reciente y tareas cerradas",
+          },
+        ]
+      : [
+          {
+            label: "Cierres semanales",
+            value: String(completedThisWeek),
+            helper: completedThisWeek === 0 ? "Aun no cerraste tareas esta semana" : "Tareas completadas en los ultimos 7 dias",
+          },
+          {
+            label: "Peso estrategico",
+            value: `${strategicShare}%`,
+            helper: "Cuanto de tu carga activa vive en Q2",
+          },
+          {
+            label: "Ritmo de cierre",
+            value: `${weeklyCompletionRate}%`,
+            helper: "Relacion entre actividad reciente y tareas cerradas",
           },
         ];
 
@@ -492,6 +547,16 @@ export default function Home() {
               <div className="dashboard-summary__grid">
                 {dashboardHighlights.map((item) => (
                   <article key={item.label} className={`dashboard-kpi ${item.tone}`}>
+                    <span>{item.label}</span>
+                    <strong>{item.value}</strong>
+                    <small>{item.helper}</small>
+                  </article>
+                ))}
+              </div>
+
+              <div className="dashboard-insights">
+                {dashboardInsights.map((item) => (
+                  <article key={item.label} className="dashboard-insight">
                     <span>{item.label}</span>
                     <strong>{item.value}</strong>
                     <small>{item.helper}</small>
