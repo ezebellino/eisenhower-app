@@ -15,7 +15,7 @@ import EditTask from "./pages/EditTask";
 
 import "../styles/theme.css";
 import PageTransition from "./components/PageTransition";
-// import Footer from "./components/Footer";
+import Footer from "./components/Footer";
 
 export default function App() {
   const location = useLocation();
@@ -90,7 +90,7 @@ export default function App() {
           />
         </Routes>
       </AnimatePresence>
-      {/* <Footer /> */}
+      <Footer />
     </AuthProvider>
   );
 }

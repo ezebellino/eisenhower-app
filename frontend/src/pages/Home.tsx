@@ -9,6 +9,24 @@ import { completeTask, deleteTask, getAllTasks, uncompleteTask } from "../servic
 import type { Task, TaskID } from "../types/tasks";
 import { useAuth } from "../auth/AuthContext";
 
+function getLatestUpdate(tasks: Task[]) {
+  if (tasks.length === 0) return "Sin actividad reciente";
+
+  const latest = [...tasks].sort(
+    (left, right) => Date.parse(right.updatedAt) - Date.parse(left.updatedAt)
+  )[0];
+
+  const date = new Date(latest.updatedAt);
+  if (Number.isNaN(date.getTime())) return "Sin actividad reciente";
+
+  return new Intl.DateTimeFormat("es-AR", {
+    day: "2-digit",
+    month: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(date);
+}
+
 export default function Home() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [isLoadingTasks, setIsLoadingTasks] = useState(true);
@@ -79,6 +97,45 @@ export default function Home() {
     }
   };
 
+  const activeTasks = tasks.filter((task) => task.status === "active");
+  const criticalTasks = activeTasks.filter((task) => task.quadrant === 1).length;
+  const strategicTasks = activeTasks.filter((task) => task.quadrant === 2).length;
+  const reactiveTasks = activeTasks.filter((task) => task.quadrant === 3).length;
+  const lowPriorityTasks = activeTasks.filter((task) => task.quadrant === 4).length;
+  const importantTasks = activeTasks.filter((task) => task.is_important).length;
+  const focusRatio =
+    activeTasks.length === 0 ? 0 : Math.round((importantTasks / activeTasks.length) * 100);
+
+  const dashboardHighlights = [
+    {
+      label: "Atencion inmediata",
+      value: String(criticalTasks),
+      helper: criticalTasks === 1 ? "1 tarea critica hoy" : `${criticalTasks} tareas criticas hoy`,
+      tone: "is-critical",
+    },
+    {
+      label: "Trabajo estrategico",
+      value: String(strategicTasks),
+      helper:
+        strategicTasks === 0
+          ? "No hay tareas de planificacion"
+          : `${strategicTasks} tareas para avanzar sin urgencia`,
+      tone: "is-strategic",
+    },
+    {
+      label: "Ruido operativo",
+      value: String(reactiveTasks + lowPriorityTasks),
+      helper: "Lo urgente menor y lo postergable viven aca",
+      tone: "is-ops",
+    },
+    {
+      label: "Foco real",
+      value: `${focusRatio}%`,
+      helper: `Ultima actualizacion ${getLatestUpdate(activeTasks)}`,
+      tone: "is-focus",
+    },
+  ];
+
   return (
     <div className="page container">
       <EisenhowerMatrix
@@ -86,17 +143,39 @@ export default function Home() {
         description="Visualiza tu carga activa, navega cada cuadrante y ejecuta con un criterio mas claro."
         banner={
           <>
-            {user ? (
-              <p>
-                Hola <strong>{user.username}</strong>. Tus tareas estan sincronizadas y listas para
-                seguir avanzando desde cualquier sesion.
-              </p>
-            ) : (
-              <p>
-                Estas usando la app en <strong>modo personal</strong>. Puedes empezar ya mismo y
-                guardar tu progreso mas adelante iniciando sesion.
-              </p>
-            )}
+            <div className="dashboard-summary">
+              <div className="dashboard-summary__intro">
+                {user ? (
+                  <p>
+                    Hola <strong>{user.username}</strong>. Tus tareas estan sincronizadas y listas
+                    para seguir avanzando desde cualquier sesion.
+                  </p>
+                ) : (
+                  <p>
+                    Estas usando la app en <strong>modo personal</strong>. Puedes empezar ya mismo
+                    y guardar tu progreso mas adelante iniciando sesion.
+                  </p>
+                )}
+
+                <small>
+                  {criticalTasks > 0
+                    ? "Empeza por el cuadrante urgente e importante para bajar friccion rapido."
+                    : strategicTasks > 0
+                      ? "Buen momento para avanzar trabajo importante antes de que se vuelva urgente."
+                      : "Tu carga esta contenida. Es un buen momento para agregar o revisar prioridades."}
+                </small>
+              </div>
+
+              <div className="dashboard-summary__grid">
+                {dashboardHighlights.map((item) => (
+                  <article key={item.label} className={`dashboard-kpi ${item.tone}`}>
+                    <span>{item.label}</span>
+                    <strong>{item.value}</strong>
+                    <small>{item.helper}</small>
+                  </article>
+                ))}
+              </div>
+            </div>
 
             {isLoadingTasks && (
               <div className="matrix-banner matrix-banner--info">
