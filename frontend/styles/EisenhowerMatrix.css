@@ -94,6 +94,20 @@
   background: rgba(255, 179, 107, 0.08);
 }
 
+.matrix-banner__stack {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.matrix-banner__actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
 .matrix-banner__action {
   justify-self: start;
 }
@@ -104,7 +118,7 @@
 
 .matrix-filters {
   display: grid;
-  grid-template-columns: minmax(0, 1.5fr) repeat(3, minmax(0, 0.75fr));
+  grid-template-columns: minmax(0, 1.5fr) repeat(4, minmax(0, 0.75fr));
   gap: 0.75rem;
 }
 

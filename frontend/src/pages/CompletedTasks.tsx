@@ -15,6 +15,7 @@ import "../../styles/Card.css";
 
 type SortOption = "recent" | "oldest" | "title-asc" | "title-desc";
 type QuadrantFilter = "all" | "1" | "2" | "3" | "4";
+type SupervisorScope = "all" | "mine" | "team" | "unassigned";
 
 function sortTasks(tasks: Task[], sortBy: SortOption) {
   const sorted = [...tasks];
@@ -44,6 +45,7 @@ export default function CompletedTasks() {
   const [searchTerm, setSearchTerm] = useState("");
   const [quadrantFilter, setQuadrantFilter] = useState<QuadrantFilter>("all");
   const [sortBy, setSortBy] = useState<SortOption>("recent");
+  const [supervisorScope, setSupervisorScope] = useState<SupervisorScope>("all");
   const deferredSearch = useDeferredValue(searchTerm);
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -124,6 +126,16 @@ export default function CompletedTasks() {
     const query = deferredSearch.trim().toLocaleLowerCase("es");
 
     const filtered = tasks.filter((task) => {
+      const matchesScope =
+        user?.role !== "supervisor"
+          ? true
+          : supervisorScope === "all"
+            ? true
+            : supervisorScope === "mine"
+              ? task.assigned_to_id === user.id
+              : supervisorScope === "team"
+                ? task.assigned_to_id != null && task.assigned_to_id !== user.id
+                : task.assigned_to_id == null;
       const matchesQuadrant =
         quadrantFilter === "all" ? true : task.quadrant === Number(quadrantFilter);
       const matchesSearch =
@@ -131,11 +143,11 @@ export default function CompletedTasks() {
           ? true
           : `${task.title} ${task.description ?? ""}`.toLocaleLowerCase("es").includes(query);
 
-      return matchesQuadrant && matchesSearch;
+      return matchesScope && matchesQuadrant && matchesSearch;
     });
 
     return sortTasks(filtered, sortBy);
-  }, [tasks, deferredSearch, quadrantFilter, sortBy]);
+  }, [tasks, deferredSearch, quadrantFilter, sortBy, supervisorScope, user]);
 
   const assigneeLookup = useMemo(
     () => new Map(staffUsers.map((staffUser) => [staffUser.id, staffUser.username])),
@@ -187,6 +199,21 @@ export default function CompletedTasks() {
                 placeholder="Titulo o descripcion"
               />
             </div>
+
+            {user?.role === "supervisor" && (
+              <div className="matrix-filter">
+                <span>Vista</span>
+                <select
+                  value={supervisorScope}
+                  onChange={(event) => setSupervisorScope(event.target.value as SupervisorScope)}
+                >
+                  <option value="all">Todas</option>
+                  <option value="mine">Asignadas a vos</option>
+                  <option value="team">Equipo</option>
+                  <option value="unassigned">Sin asignar</option>
+                </select>
+              </div>
+            )}
 
             <div className="matrix-filter">
               <span>Cuadrante</span>

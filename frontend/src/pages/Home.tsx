@@ -1,4 +1,5 @@
 import { useDeferredValue, useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import EisenhowerMatrix from "../components/EisenhowerMatrix";
 import {
   confirmDestructiveAction,
@@ -13,6 +14,7 @@ import { listUsers, type UserSummary } from "../services/userService";
 
 type SortOption = "recent" | "oldest" | "title-asc" | "title-desc";
 type QuadrantFilter = "all" | "1" | "2" | "3" | "4";
+type SupervisorScope = "all" | "mine" | "team" | "unassigned";
 
 function getLatestUpdate(tasks: Task[]) {
   if (tasks.length === 0) return "Sin actividad reciente";
@@ -61,6 +63,7 @@ export default function Home() {
   const [searchTerm, setSearchTerm] = useState("");
   const [quadrantFilter, setQuadrantFilter] = useState<QuadrantFilter>("all");
   const [sortBy, setSortBy] = useState<SortOption>("recent");
+  const [supervisorScope, setSupervisorScope] = useState<SupervisorScope>("all");
   const deferredSearch = useDeferredValue(searchTerm);
   const { user } = useAuth();
   const [indexQ1, setIndexQ1] = useState(0);
@@ -154,41 +157,104 @@ export default function Home() {
   const importantTasks = activeTasks.filter((task) => task.is_important).length;
   const focusRatio =
     activeTasks.length === 0 ? 0 : Math.round((importantTasks / activeTasks.length) * 100);
+  const myAssignedTasks = user
+    ? activeTasks.filter((task) => task.assigned_to_id === user.id).length
+    : 0;
+  const teamAssignedTasks = user
+    ? activeTasks.filter(
+        (task) => task.assigned_to_id != null && task.assigned_to_id !== user.id
+      ).length
+    : 0;
+  const unassignedTasks = activeTasks.filter((task) => task.assigned_to_id == null).length;
+  const q1TeamRisk = user
+    ? activeTasks.filter((task) => task.quadrant === 1 && task.assigned_to_id !== user.id).length
+    : 0;
 
-  const dashboardHighlights = [
-    {
-      label: "Atencion inmediata",
-      value: String(criticalTasks),
-      helper: criticalTasks === 1 ? "1 tarea critica hoy" : `${criticalTasks} tareas criticas hoy`,
-      tone: "is-critical",
-    },
-    {
-      label: "Trabajo estrategico",
-      value: String(strategicTasks),
-      helper:
-        strategicTasks === 0
-          ? "No hay tareas de planificacion"
-          : `${strategicTasks} tareas para avanzar sin urgencia`,
-      tone: "is-strategic",
-    },
-    {
-      label: "Ruido operativo",
-      value: String(reactiveTasks + lowPriorityTasks),
-      helper: "Lo urgente menor y lo postergable viven aca",
-      tone: "is-ops",
-    },
-    {
-      label: "Foco real",
-      value: `${focusRatio}%`,
-      helper: `Ultima actualizacion ${getLatestUpdate(activeTasks)}`,
-      tone: "is-focus",
-    },
-  ];
+  const dashboardHighlights =
+    user?.role === "supervisor"
+      ? [
+          {
+            label: "Asignadas a vos",
+            value: String(myAssignedTasks),
+            helper:
+              myAssignedTasks === 0
+                ? "No tenes carga propia asignada"
+                : `${myAssignedTasks} tareas esperan seguimiento directo`,
+            tone: "is-focus",
+          },
+          {
+            label: "Equipo en curso",
+            value: String(teamAssignedTasks),
+            helper:
+              teamAssignedTasks === 0
+                ? "Todavia no delegaste al staff"
+                : `${teamAssignedTasks} tareas estan hoy en manos del equipo`,
+            tone: "is-strategic",
+          },
+          {
+            label: "Sin asignar",
+            value: String(unassignedTasks),
+            helper:
+              unassignedTasks === 0
+                ? "Toda la carga ya tiene responsable"
+                : "Buen candidato para repartir y ordenar mejor",
+            tone: "is-ops",
+          },
+          {
+            label: "Riesgo en Q1",
+            value: String(q1TeamRisk),
+            helper:
+              q1TeamRisk === 0
+                ? "No hay urgencias criticas fuera de tu foco"
+                : `${q1TeamRisk} tareas urgentes requieren seguimiento`,
+            tone: "is-critical",
+          },
+        ]
+      : [
+          {
+            label: "Atencion inmediata",
+            value: String(criticalTasks),
+            helper:
+              criticalTasks === 1 ? "1 tarea critica hoy" : `${criticalTasks} tareas criticas hoy`,
+            tone: "is-critical",
+          },
+          {
+            label: "Trabajo estrategico",
+            value: String(strategicTasks),
+            helper:
+              strategicTasks === 0
+                ? "No hay tareas de planificacion"
+                : `${strategicTasks} tareas para avanzar sin urgencia`,
+            tone: "is-strategic",
+          },
+          {
+            label: "Ruido operativo",
+            value: String(reactiveTasks + lowPriorityTasks),
+            helper: "Lo urgente menor y lo postergable viven aca",
+            tone: "is-ops",
+          },
+          {
+            label: "Foco real",
+            value: `${focusRatio}%`,
+            helper: `Ultima actualizacion ${getLatestUpdate(activeTasks)}`,
+            tone: "is-focus",
+          },
+        ];
 
   const visibleTasks = useMemo(() => {
     const query = deferredSearch.trim().toLocaleLowerCase("es");
 
     const filtered = activeTasks.filter((task) => {
+      const matchesScope =
+        user?.role !== "supervisor"
+          ? true
+          : supervisorScope === "all"
+            ? true
+            : supervisorScope === "mine"
+              ? task.assigned_to_id === user.id
+              : supervisorScope === "team"
+                ? task.assigned_to_id != null && task.assigned_to_id !== user.id
+                : task.assigned_to_id == null;
       const matchesQuadrant =
         quadrantFilter === "all" ? true : task.quadrant === Number(quadrantFilter);
       const matchesSearch =
@@ -196,11 +262,11 @@ export default function Home() {
           ? true
           : `${task.title} ${task.description ?? ""}`.toLocaleLowerCase("es").includes(query);
 
-      return matchesQuadrant && matchesSearch;
+      return matchesScope && matchesQuadrant && matchesSearch;
     });
 
     return sortTasks(filtered, sortBy);
-  }, [activeTasks, deferredSearch, quadrantFilter, sortBy]);
+  }, [activeTasks, deferredSearch, quadrantFilter, sortBy, supervisorScope, user]);
 
   const assigneeLookup = useMemo(
     () => new Map(staffUsers.map((staffUser) => [staffUser.id, staffUser.username])),
@@ -236,7 +302,7 @@ export default function Home() {
 
                 <small>
                   {user?.role === "supervisor"
-                    ? "Tu cuenta tiene rol supervisor. Es una buena base para futuros flujos de asignacion al equipo."
+                    ? "Estas viendo una consola de supervision: filtra por responsable, detecta carga sin asignar y segui el riesgo operativo del equipo."
                     : criticalTasks > 0
                       ? "Empeza por el cuadrante urgente e importante para bajar friccion rapido."
                       : strategicTasks > 0
@@ -264,11 +330,28 @@ export default function Home() {
 
             {user?.role === "supervisor" && (
               <div className="matrix-banner matrix-banner--supervisor">
-                <p>Modo supervisor activo.</p>
-                <small>
-                  Hoy ya podes operar tu espacio con cuenta. El siguiente paso natural es sumar
-                  asignacion de tareas al staff desde este mismo sistema.
-                </small>
+                <div className="matrix-banner__stack">
+                  <div>
+                    <p>Modo supervisor activo.</p>
+                    <small>
+                      Hoy ya podes crear, asignar y monitorear el trabajo del equipo desde este
+                      mismo dashboard.
+                    </small>
+                  </div>
+
+                  <div className="matrix-banner__actions">
+                    <Link to="/tasks/create" className="btn-primary">
+                      Crear y asignar tarea
+                    </Link>
+                    <button
+                      type="button"
+                      className="btn-ghost"
+                      onClick={() => setSupervisorScope("unassigned")}
+                    >
+                      Ver sin asignar
+                    </button>
+                  </div>
+                </div>
               </div>
             )}
 
@@ -300,6 +383,21 @@ export default function Home() {
                 placeholder="Titulo o descripcion"
               />
             </div>
+
+            {user?.role === "supervisor" && (
+              <div className="matrix-filter">
+                <span>Vista</span>
+                <select
+                  value={supervisorScope}
+                  onChange={(event) => setSupervisorScope(event.target.value as SupervisorScope)}
+                >
+                  <option value="all">Todas</option>
+                  <option value="mine">Asignadas a vos</option>
+                  <option value="team">Equipo</option>
+                  <option value="unassigned">Sin asignar</option>
+                </select>
+              </div>
+            )}
 
             <div className="matrix-filter">
               <span>Cuadrante</span>
