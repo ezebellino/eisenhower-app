@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
+import { showErrorAlert, showInfoAlert, showSuccessToast } from "../services/alertService";
 import { login } from "../services/authService";
+import { migrateLocalTasksToAccount } from "../services/taskMigrationService";
 import "../../styles/Login.css";
 
 export default function Login() {
@@ -20,10 +22,23 @@ export default function Login() {
 
     try {
       await login({ username, password });
+      const migratedCount = await migrateLocalTasksToAccount();
       await refreshMe();
+
+      if (migratedCount > 0) {
+        await showInfoAlert(
+          "Migración completada",
+          `Se copiaron ${migratedCount} tarea${migratedCount === 1 ? "" : "s"} local${migratedCount === 1 ? "" : "es"} a tu cuenta.`
+        );
+      } else {
+        await showSuccessToast("Sesión iniciada");
+      }
+
       navigate("/tasks");
     } catch (e: any) {
-      setErr(e?.message ?? "Error de login");
+      const message = e?.message ?? "Error de login";
+      setErr(message);
+      await showErrorAlert("No pudimos iniciar sesión", message);
     } finally {
       setLoading(false);
     }

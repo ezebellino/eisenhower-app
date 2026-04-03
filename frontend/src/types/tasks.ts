@@ -1,9 +1,9 @@
 export type Quadrant = 1 | 2 | 3 | 4;
 export type TaskStatus = "active" | "completed";
-export type TaskID = number | string;
+export type TaskID = number;
 
 /**
- * API model: exactamente lo que devuelve FastAPI
+ * API model (backend)
  */
 export interface ApiTask {
   id: TaskID;
@@ -14,14 +14,15 @@ export interface ApiTask {
   is_important: boolean;
 
   completed: boolean;
+  assigned_to_id?: number | null;
 
-  created_at: string; // ISO
-  updated_at: string; // ISO
+  created_at: string;
+  updated_at: string;
 }
 
 /**
- * UI model: lo que usa tu frontend internamente
- * Nota: preservamos is_urgent/is_important para edición y creación.
+ * UI model (frontend)
+ * Incluye is_urgent / is_important para no depender del API en pantallas.
  */
 export interface Task {
   id: TaskID;
@@ -34,36 +35,17 @@ export interface Task {
   quadrant: Quadrant;
   status: TaskStatus;
 
-  createdAt: string; // ISO
-  updatedAt: string; // ISO
+  createdAt: string;
+  updatedAt: string;
+
+  assigned_to_id?: number | null;
 }
 
-/**
- * Derivar cuadrante en base a urgente/importante
- */
-export const toQuadrant = (t: Pick<ApiTask, "is_urgent" | "is_important">): Quadrant => {
+export const toQuadrant = (t: Pick<Task, "is_urgent" | "is_important">): Quadrant => {
   if (t.is_urgent && t.is_important) return 1;
   if (!t.is_urgent && t.is_important) return 2;
   if (t.is_urgent && !t.is_important) return 3;
   return 4;
-};
-
-/**
- * (Opcional) Derivar urgente/importante desde quadrant
- * Útil si alguna vez necesitás recalcularlo desde UI.
- */
-export const toUrgentImportant = (q: Quadrant): { is_urgent: boolean; is_important: boolean } => {
-  switch (q) {
-    case 1:
-      return { is_urgent: true, is_important: true };
-    case 2:
-      return { is_urgent: false, is_important: true };
-    case 3:
-      return { is_urgent: true, is_important: false };
-    case 4:
-    default:
-      return { is_urgent: false, is_important: false };
-  }
 };
 
 export const fromApiTask = (t: ApiTask): Task => ({
@@ -74,9 +56,20 @@ export const fromApiTask = (t: ApiTask): Task => ({
   is_urgent: t.is_urgent,
   is_important: t.is_important,
 
-  quadrant: toQuadrant(t),
+  quadrant: toQuadrant({ is_urgent: t.is_urgent, is_important: t.is_important }),
   status: t.completed ? "completed" : "active",
 
   createdAt: t.created_at,
   updatedAt: t.updated_at,
+
+  assigned_to_id: t.assigned_to_id ?? null,
 });
+
+/**
+ * Para el modo local (sin backend): derivamos cuadrante/estado desde flags.
+ */
+export const normalizeLocalTask = (t: Omit<Task, "quadrant" | "status"> & Partial<Pick<Task, "quadrant" | "status">>): Task => {
+  const quadrant = t.quadrant ?? toQuadrant({ is_urgent: t.is_urgent, is_important: t.is_important });
+  const status = t.status ?? "active";
+  return { ...(t as any), quadrant, status };
+};

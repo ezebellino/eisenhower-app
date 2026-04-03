@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { createTask, type CreateTaskPayload } from "../services/taskServices";
+import { showErrorAlert, showSuccessToast } from "../services/alertService";
 import "../../styles/formAnimation.css";
 import "../../styles/formStyle.css";
 
@@ -17,6 +18,7 @@ export default function CreateTask() {
   });
 
   const [errors, setErrors] = useState<FormErrors>({});
+  const [saving, setSaving] = useState(false);
 
   const validate = (): FormErrors => {
     const newErrors: FormErrors = {};
@@ -57,8 +59,19 @@ export default function CreateTask() {
     setErrors(validationErrors);
     if (Object.keys(validationErrors).length > 0) return;
 
-    await createTask(formData);
-    navigate("/");
+    setSaving(true);
+
+    try {
+      await createTask(formData);
+      await showSuccessToast("Tarea creada correctamente");
+      navigate("/tasks");
+    } catch (error: any) {
+      const message = error?.message ?? "No se pudo crear la tarea.";
+      setErrors({ general: message });
+      await showErrorAlert("No pudimos crear la tarea", message);
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -136,8 +149,8 @@ export default function CreateTask() {
                 Volver
               </button>
 
-              <button type="submit" className="btn-primary">
-                Crear tarea
+              <button type="submit" className="btn-primary" disabled={saving}>
+                {saving ? "Creando..." : "Crear tarea"}
               </button>
             </div>
           </form>

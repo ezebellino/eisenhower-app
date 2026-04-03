@@ -2,7 +2,7 @@
 .form-page {
   display: flex;
   justify-content: center;
-  padding: 10%;
+  padding: 4rem 0 1rem;
 }
 
 .form-card {
@@ -83,7 +83,7 @@
 }
 
 .check input[type="checkbox"] {
-  accent-color: var(--brand);
+  accent-color: var(--accent);
 }
 
 .form-actions {
@@ -125,4 +125,19 @@
 .form-hint {
   margin-top: 6px;
   font-size: 0.9rem;
+}
+
+@media (max-width: 640px) {
+  .form-page {
+    padding-top: 1rem;
+  }
+
+  .form-checks,
+  .form-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .form-actions {
+    display: grid;
+  }
 }

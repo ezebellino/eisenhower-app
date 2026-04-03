@@ -1,7 +1,7 @@
 import { Routes, Route, useLocation } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
 import { AuthProvider } from "./auth/AuthContext";
-import ProtectedRoute from "./auth/ProtectedRoute";
+// import ProtectedRoute from "./auth/ProtectedRoute";
 
 import Navbar from "./components/Navbar";
 import Login from "./pages/Login";
@@ -15,6 +15,7 @@ import EditTask from "./pages/EditTask";
 
 import "../styles/theme.css";
 import PageTransition from "./components/PageTransition";
+// import Footer from "./components/Footer";
 
 export default function App() {
   const location = useLocation();
@@ -54,49 +55,42 @@ export default function App() {
 
           <Route
             path="/tasks"
-            element={
-              <ProtectedRoute>
+            element={            
                 <PageTransition>
                   <Home />
-                </PageTransition>
-              </ProtectedRoute>
+                </PageTransition>              
             }
           />
 
           <Route
             path="/tasks/completed"
-            element={
-              <ProtectedRoute>
+            element={            
                 <PageTransition>
                   <CompletedTasks />
-                </PageTransition>
-              </ProtectedRoute>
+                </PageTransition>              
             }
           />
 
           <Route
             path="/tasks/create"
             element={
-              <ProtectedRoute>
                 <PageTransition>
                   <CreateTask />
                 </PageTransition>
-              </ProtectedRoute>
-            }
+              }
           />
 
           <Route
             path="/tasks/:id/edit"
             element={
-              <ProtectedRoute>
                 <PageTransition>
                   <EditTask />
                 </PageTransition>
-              </ProtectedRoute>
-            }
+              }
           />
         </Routes>
       </AnimatePresence>
+      {/* <Footer /> */}
     </AuthProvider>
   );
 }
