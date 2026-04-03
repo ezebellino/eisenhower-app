@@ -7,6 +7,8 @@ export type CreateTaskPayload = {
   description?: string | null;
   is_urgent: boolean;
   is_important: boolean;
+  scheduled_for?: string | null;
+  recurrence?: "daily" | "weekly" | "monthly" | null;
   assigned_to_id?: number | null;
 };
 

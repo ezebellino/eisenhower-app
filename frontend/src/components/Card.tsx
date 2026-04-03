@@ -39,6 +39,30 @@ function formatDate(value: string) {
   }).format(date);
 }
 
+function formatScheduleDate(value: string | null | undefined) {
+  if (!value) return null;
+  const date = new Date(`${value}T00:00:00`);
+  if (Number.isNaN(date.getTime())) return value;
+
+  return new Intl.DateTimeFormat("es-AR", {
+    day: "2-digit",
+    month: "short",
+  }).format(date);
+}
+
+function recurrenceLabel(value: Task["recurrence"]) {
+  switch (value) {
+    case "daily":
+      return "Diaria";
+    case "weekly":
+      return "Semanal";
+    case "monthly":
+      return "Mensual";
+    default:
+      return null;
+  }
+}
+
 function quadrantToneClass(quadrant: Task["quadrant"]) {
   switch (quadrant) {
     case 1:
@@ -92,6 +116,10 @@ export default function Card({
         </span>
         {task.is_important && <span className="badge">Impacto alto</span>}
         {task.is_urgent && <span className="badge">Atencion hoy</span>}
+        {task.scheduled_for && (
+          <span className="badge">Agenda {formatScheduleDate(task.scheduled_for)}</span>
+        )}
+        {task.recurrence && <span className="badge">Repite {recurrenceLabel(task.recurrence)}</span>}
       </div>
 
         {assignmentLabel && (

@@ -57,6 +57,7 @@ export default function Footer() {
             <span>App</span>
             <Link to="/">Inicio</Link>
             <Link to="/tasks">Dashboard</Link>
+            <Link to="/tasks/agenda">Agenda</Link>
             <Link to="/tasks/completed">Historial</Link>
           </div>
 

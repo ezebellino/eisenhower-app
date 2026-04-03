@@ -17,6 +17,8 @@ class Task(Base):
     is_urgent: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     is_important: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     completed: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    scheduled_for: Mapped[str | None] = mapped_column(String, nullable=True, index=True)
+    recurrence: Mapped[str | None] = mapped_column(String, nullable=True)
 
     assigned_to_id: Mapped[int | None] = mapped_column(
         ForeignKey("users.id"),

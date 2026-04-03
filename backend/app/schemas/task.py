@@ -8,6 +8,8 @@ class TaskBase(BaseModel):
     description: Optional[str] = None
     is_urgent: Optional[bool] = None
     is_important: Optional[bool] = None
+    scheduled_for: Optional[str] = None
+    recurrence: Optional[str] = None
     assigned_to_id: Optional[int] = None
 
 
@@ -32,6 +34,8 @@ class TaskOut(BaseModel):
     is_urgent: bool
     is_important: bool
     completed: bool
+    scheduled_for: Optional[str] = None
+    recurrence: Optional[str] = None
     assigned_to_id: Optional[int] = None
     created_at: datetime | None = None
     updated_at: datetime | None = None

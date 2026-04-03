@@ -7,6 +7,7 @@ import Navbar from "./components/Navbar";
 import Login from "./pages/Login";
 import Landing from "./pages/Landing";
 import Home from "./pages/Home";
+import Agenda from "./pages/Agenda";
 import Register from "./pages/Register";
 import CompletedTasks from "./pages/CompletedTasks";
 import CreateTask from "./pages/CreateTask";
@@ -68,6 +69,15 @@ export default function App() {
                 <PageTransition>
                   <CompletedTasks />
                 </PageTransition>              
+            }
+          />
+
+          <Route
+            path="/tasks/agenda"
+            element={
+              <PageTransition>
+                <Agenda />
+              </PageTransition>
             }
           />
 

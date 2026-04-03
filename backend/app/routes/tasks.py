@@ -68,6 +68,8 @@ def create_task(
         description=payload.description,
         is_urgent=payload.is_urgent,
         is_important=payload.is_important,
+        scheduled_for=payload.scheduled_for,
+        recurrence=payload.recurrence,
         assigned_to_id=assigned_to_id,
     )
     db.add(task)

@@ -24,6 +24,8 @@ export default function CreateTask() {
     description: "",
     is_urgent: false,
     is_important: false,
+    scheduled_for: null,
+    recurrence: null,
     assigned_to_id: null,
   });
 
@@ -63,6 +65,10 @@ export default function CreateTask() {
       newErrors.description = "La descripcion debe tener al menos 5 caracteres";
     }
 
+    if (formData.recurrence && !formData.scheduled_for) {
+      newErrors.scheduled_for = "Selecciona una fecha base para repetir esta tarea";
+    }
+
     if (isSupervisor) {
       if (assignmentMode === "single" && !formData.assigned_to_id) {
         newErrors.assigned_to_id = "Selecciona una persona del staff";
@@ -87,6 +93,22 @@ export default function CreateTask() {
     setFormData((prev) => ({
       ...prev,
       [name]: type === "checkbox" ? checked : value,
+    }));
+  };
+
+  const handleScheduleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setFormData((prev) => ({
+      ...prev,
+      scheduled_for: value || null,
+    }));
+  };
+
+  const handleRecurrenceChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = e.target.value as CreateTaskPayload["recurrence"] | "";
+    setFormData((prev) => ({
+      ...prev,
+      recurrence: value || null,
     }));
   };
 
@@ -132,6 +154,8 @@ export default function CreateTask() {
         description: formData.description?.trim() ? formData.description.trim() : "",
         is_urgent: formData.is_urgent,
         is_important: formData.is_important,
+        scheduled_for: formData.scheduled_for ?? null,
+        recurrence: formData.recurrence ?? null,
       };
 
       const targetAssigneeIds =
@@ -203,6 +227,39 @@ export default function CreateTask() {
                 placeholder="Agrega contexto, entregable o proximo paso"
               />
               {errors.description && <p className="error fade-in">{errors.description}</p>}
+            </div>
+
+            <div className="form-grid">
+              <div className="form-field">
+                <label className={errors.scheduled_for ? "label-shake" : ""}>Programar para</label>
+                <input
+                  type="date"
+                  value={formData.scheduled_for ?? ""}
+                  onChange={handleScheduleDateChange}
+                  className={`form-input ${errors.scheduled_for ? "input-error shake" : ""}`}
+                />
+                <p className="subtle form-hint">
+                  Si eliges fecha, la tarea va a aparecer en tu agenda personal.
+                </p>
+                {errors.scheduled_for && <p className="error fade-in">{errors.scheduled_for}</p>}
+              </div>
+
+              <div className="form-field">
+                <label>Repetir</label>
+                <select
+                  className="form-input"
+                  value={formData.recurrence ?? ""}
+                  onChange={handleRecurrenceChange}
+                >
+                  <option value="">No repetir</option>
+                  <option value="daily">Todos los dias</option>
+                  <option value="weekly">Cada semana</option>
+                  <option value="monthly">Cada mes</option>
+                </select>
+                <p className="subtle form-hint">
+                  Ideal para rutinas, revisiones o tareas que vuelven en el tiempo.
+                </p>
+              </div>
             </div>
 
             {isSupervisor && (

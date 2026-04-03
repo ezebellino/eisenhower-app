@@ -77,6 +77,12 @@ export default function Navbar() {
             >
               Historial
             </NavLink>
+            <NavLink
+              to="/tasks/agenda"
+              className={({ isActive }) => `navbar__link ${isActive ? "is-active" : ""}`}
+            >
+              Agenda
+            </NavLink>
           </nav>
         </div>
 
@@ -146,6 +152,12 @@ export default function Navbar() {
               className={({ isActive }) => `navbar__mobile-link ${isActive ? "is-active" : ""}`}
             >
               Historial
+            </NavLink>
+            <NavLink
+              to="/tasks/agenda"
+              className={({ isActive }) => `navbar__mobile-link ${isActive ? "is-active" : ""}`}
+            >
+              Agenda
             </NavLink>
           </nav>
 

@@ -22,6 +22,8 @@ export default function EditTask() {
   const [description, setDescription] = useState("");
   const [isUrgent, setIsUrgent] = useState(false);
   const [isImportant, setIsImportant] = useState(false);
+  const [scheduledFor, setScheduledFor] = useState<string | null>(null);
+  const [recurrence, setRecurrence] = useState<Task["recurrence"]>(null);
   const [assignedToId, setAssignedToId] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
@@ -56,6 +58,8 @@ export default function EditTask() {
         setDescription(found.description ?? "");
         setIsUrgent(found.is_urgent);
         setIsImportant(found.is_important);
+        setScheduledFor(found.scheduled_for ?? null);
+        setRecurrence(found.recurrence ?? null);
         setAssignedToId(found.assigned_to_id ?? null);
       } catch (err: any) {
         setError(err?.message ?? "Error cargando la tarea.");
@@ -74,6 +78,8 @@ export default function EditTask() {
         description: description.trim() ? description.trim() : null,
         is_urgent: isUrgent,
         is_important: isImportant,
+        scheduled_for: scheduledFor ?? null,
+        recurrence: recurrence ?? null,
         assigned_to_id: isSupervisor ? assignedToId : undefined,
       });
 
@@ -144,6 +150,37 @@ export default function EditTask() {
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Aclara contexto, entregable o siguiente paso"
               />
+            </div>
+
+            <div className="form-grid">
+              <div className="form-field">
+                <label>Programar para</label>
+                <input
+                  type="date"
+                  className="form-input"
+                  value={scheduledFor ?? ""}
+                  onChange={(e) => setScheduledFor(e.target.value || null)}
+                />
+                <p className="subtle form-hint">
+                  Si tiene fecha, la tarea tambien se ve dentro de la agenda personal.
+                </p>
+              </div>
+
+              <div className="form-field">
+                <label>Repetir</label>
+                <select
+                  className="form-input"
+                  value={recurrence ?? ""}
+                  onChange={(e) =>
+                    setRecurrence((e.target.value as Task["recurrence"] | "") || null)
+                  }
+                >
+                  <option value="">No repetir</option>
+                  <option value="daily">Todos los dias</option>
+                  <option value="weekly">Cada semana</option>
+                  <option value="monthly">Cada mes</option>
+                </select>
+              </div>
             </div>
 
             {isSupervisor && (
