@@ -1,6 +1,8 @@
 export const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
 
+export const AUTH_EXPIRED_EVENT = "auth:expired";
+
 export function getToken(): string | null {
   return localStorage.getItem("access_token");
 }
@@ -35,6 +37,11 @@ export async function fetchJson<T>(path: string, options: RequestInit = {}): Pro
 
   if (!res.ok) {
     const text = await res.text().catch(() => "");
+    if (res.status === 401) {
+      clearToken();
+      window.dispatchEvent(new CustomEvent(AUTH_EXPIRED_EVENT));
+      throw new Error("Tu sesion vencio. Inicia sesion nuevamente para continuar.");
+    }
     throw new Error(`API error ${res.status}: ${text}`);
   }
 

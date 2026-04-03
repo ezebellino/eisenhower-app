@@ -132,6 +132,7 @@
 .btn-completar,
 .btn-revertir,
 .btn-duplicate,
+.btn-reassign,
 .btn-eliminar,
 .card-link {
   width: 100%;
@@ -142,6 +143,7 @@
 .btn-completar,
 .btn-revertir,
 .btn-duplicate,
+.btn-reassign,
 .btn-eliminar {
   border: 1px solid rgba(255, 255, 255, 0.08);
   background: rgba(255, 255, 255, 0.05);
@@ -151,6 +153,7 @@
 .btn-completar:hover,
 .btn-revertir:hover,
 .btn-duplicate:hover,
+.btn-reassign:hover,
 .btn-eliminar:hover {
   transform: translateY(-1px);
 }
@@ -168,6 +171,11 @@
 .btn-duplicate {
   border-color: rgba(126, 169, 255, 0.22);
   background: rgba(126, 169, 255, 0.09);
+}
+
+.btn-reassign {
+  border-color: rgba(255, 179, 107, 0.22);
+  background: rgba(255, 179, 107, 0.09);
 }
 
 .btn-eliminar {
