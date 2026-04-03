@@ -109,6 +109,20 @@ cd backend
 uvicorn main:app --reload
 ```
 
+## Environment Files
+
+Hay archivos de ejemplo para preparar entornos locales o de deploy:
+
+- `backend/.env.example`
+- `frontend/.env.example`
+
+Variables clave:
+
+- `DATABASE_URL`
+- `SECRET_KEY`
+- `ALLOWED_ORIGINS`
+- `VITE_API_BASE_URL`
+
 ## Install on Mobile
 
 La app ya tiene una base PWA para poder instalarse como acceso directo cuando este publicada por `https`.
@@ -144,6 +158,20 @@ Proximos pasos naturales:
 - evolucionar recordatorios locales hacia notificaciones mas robustas
 - mejorar accesibilidad, rendimiento y atajos de uso
 - consolidar despliegue productivo
+
+## Deploy Direction
+
+Stack sugerido para una primera puesta online:
+
+- `frontend`: Vercel
+- `backend`: Render
+- `database`: Neon Postgres o Supabase Postgres
+
+Notas:
+
+- el backend ya puede correr con `SQLite` en local y `Postgres` en produccion
+- CORS se resuelve con `ALLOWED_ORIGINS`
+- el frontend apunta al backend publicado usando `VITE_API_BASE_URL`
 
 ## Author
 

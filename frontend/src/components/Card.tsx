@@ -55,6 +55,20 @@ function formatScheduleTime(value: string | null | undefined) {
   return value.slice(0, 5);
 }
 
+function formatScheduleTimeRange(
+  start: string | null | undefined,
+  end: string | null | undefined
+) {
+  const formattedStart = formatScheduleTime(start);
+  const formattedEnd = formatScheduleTime(end);
+
+  if (formattedStart && formattedEnd) {
+    return `${formattedStart} a ${formattedEnd}`;
+  }
+
+  return formattedStart ?? formattedEnd ?? null;
+}
+
 function recurrenceLabel(value: Task["recurrence"]) {
   switch (value) {
     case "daily":
@@ -63,6 +77,8 @@ function recurrenceLabel(value: Task["recurrence"]) {
       return "Semanal";
     case "monthly":
       return "Mensual";
+    case "weekdays":
+      return "Lun a vie";
     default:
       return null;
   }
@@ -124,10 +140,13 @@ export default function Card({
         {task.scheduled_for && (
           <span className="badge">Agenda {formatScheduleDate(task.scheduled_for)}</span>
         )}
-        {task.scheduled_time && (
-          <span className="badge">Hora {formatScheduleTime(task.scheduled_time)}</span>
+        {formatScheduleTimeRange(task.scheduled_time, task.scheduled_time_end) && (
+          <span className="badge">
+            Hora {formatScheduleTimeRange(task.scheduled_time, task.scheduled_time_end)}
+          </span>
         )}
         {task.recurrence && <span className="badge">Repite {recurrenceLabel(task.recurrence)}</span>}
+        {task.exclude_holidays && <span className="badge">Salta feriados AR</span>}
       </div>
 
         {assignmentLabel && (

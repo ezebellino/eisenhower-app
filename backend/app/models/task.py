@@ -19,7 +19,9 @@ class Task(Base):
     completed: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     scheduled_for: Mapped[str | None] = mapped_column(String, nullable=True, index=True)
     scheduled_time: Mapped[str | None] = mapped_column(String, nullable=True)
+    scheduled_time_end: Mapped[str | None] = mapped_column(String, nullable=True)
     recurrence: Mapped[str | None] = mapped_column(String, nullable=True)
+    exclude_holidays: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
 
     assigned_to_id: Mapped[int | None] = mapped_column(
         ForeignKey("users.id"),

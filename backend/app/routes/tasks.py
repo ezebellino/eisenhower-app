@@ -70,7 +70,9 @@ def create_task(
         is_important=payload.is_important,
         scheduled_for=payload.scheduled_for,
         scheduled_time=payload.scheduled_time,
+        scheduled_time_end=payload.scheduled_time_end,
         recurrence=payload.recurrence,
+        exclude_holidays=payload.exclude_holidays,
         assigned_to_id=assigned_to_id,
     )
     db.add(task)

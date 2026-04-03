@@ -10,7 +10,9 @@ class TaskBase(BaseModel):
     is_important: Optional[bool] = None
     scheduled_for: Optional[str] = None
     scheduled_time: Optional[str] = None
+    scheduled_time_end: Optional[str] = None
     recurrence: Optional[str] = None
+    exclude_holidays: Optional[bool] = None
     assigned_to_id: Optional[int] = None
 
 
@@ -19,6 +21,7 @@ class TaskCreate(TaskBase):
     description: str = ""
     is_urgent: bool = False
     is_important: bool = False
+    exclude_holidays: bool = False
     assigned_to_id: Optional[int] = None
 
 
@@ -37,7 +40,9 @@ class TaskOut(BaseModel):
     completed: bool
     scheduled_for: Optional[str] = None
     scheduled_time: Optional[str] = None
+    scheduled_time_end: Optional[str] = None
     recurrence: Optional[str] = None
+    exclude_holidays: bool
     assigned_to_id: Optional[int] = None
     created_at: datetime | None = None
     updated_at: datetime | None = None

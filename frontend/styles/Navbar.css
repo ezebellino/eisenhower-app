@@ -322,3 +322,21 @@
     padding: 0.82rem 0.9rem;
   }
 }
+
+@media (max-height: 500px) and (max-width: 980px) {
+  .navbar__brand-copy {
+    display: none;
+  }
+
+  .navbar__brand {
+    gap: 0;
+  }
+
+  .navbar__inner {
+    min-height: 4rem;
+  }
+
+  .navbar__right--desktop .btn-ghost {
+    display: none;
+  }
+}
