@@ -28,6 +28,8 @@ def ensure_task_schedule_columns() -> None:
 
     if "scheduled_for" not in columns:
         statements.append("ALTER TABLE tasks ADD COLUMN scheduled_for VARCHAR")
+    if "scheduled_time" not in columns:
+        statements.append("ALTER TABLE tasks ADD COLUMN scheduled_time VARCHAR")
     if "recurrence" not in columns:
         statements.append("ALTER TABLE tasks ADD COLUMN recurrence VARCHAR")
 

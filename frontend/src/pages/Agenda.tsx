@@ -87,12 +87,17 @@ function recurrenceLabel(value: Task["recurrence"]) {
   }
 }
 
+function formatTaskTime(value: string | null | undefined) {
+  if (!value) return "Sin horario";
+  return value.slice(0, 5);
+}
+
 function getScopeTitle(scope: AgendaScope, selectedDate: Date, today: Date, tomorrow: Date) {
   switch (scope) {
     case "today":
-      return `Hoy · ${dayLabel(today)}`;
+      return `Hoy | ${dayLabel(today)}`;
     case "tomorrow":
-      return `Manana · ${dayLabel(tomorrow)}`;
+      return `Manana | ${dayLabel(tomorrow)}`;
     case "week":
       return "Esta semana";
     case "selected":
@@ -202,6 +207,10 @@ export default function Agenda() {
           : selectedTasks;
 
   const scopeTitle = getScopeTitle(scope, selectedDate, today, tomorrow);
+  const timedTodayTasks = [...tasksToday]
+    .filter((task) => Boolean(task.scheduled_time))
+    .sort((left, right) => (left.scheduled_time ?? "").localeCompare(right.scheduled_time ?? ""));
+  const floatingTodayTasks = tasksToday.filter((task) => !task.scheduled_time);
 
   const handleEnableNotifications = async () => {
     if (!supportsBrowserNotifications()) {
@@ -330,6 +339,68 @@ export default function Agenda() {
             </button>
           )}
         </div>
+      </section>
+
+      <section className="agenda-dayflow">
+        <div className="agenda-dayflow__timeline panel">
+          <div className="agenda-sidebar__header">
+            <p className="agenda-hero__eyebrow">Hoy en bloques</p>
+            <h2>Horarios ocupados</h2>
+          </div>
+
+          {timedTodayTasks.length === 0 ? (
+            <div className="agenda-sidebar__empty">
+              <strong>No hay tareas con horario para hoy.</strong>
+              <p>Si programas una hora, tu dia se empieza a ordenar automaticamente desde aqui.</p>
+            </div>
+          ) : (
+            <div className="agenda-timeline">
+              {timedTodayTasks.map((task) => (
+                <article key={`today-${task.id}`} className="agenda-timeline__item">
+                  <div className="agenda-timeline__time">{formatTaskTime(task.scheduled_time)}</div>
+                  <div className="agenda-timeline__content">
+                    <strong>{task.title}</strong>
+                    <p>{task.description || "Sin descripcion adicional."}</p>
+                    <div className="agenda-task__meta">
+                      <span>{task.is_important ? "Importante" : "Pendiente menor"}</span>
+                      {task.recurrence && <span>Repite {recurrenceLabel(task.recurrence)}</span>}
+                    </div>
+                  </div>
+                </article>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <aside className="agenda-dayflow__pending panel">
+          <div className="agenda-sidebar__header">
+            <p className="agenda-hero__eyebrow">Pendientes del dia</p>
+            <h2>Sin horario fijo</h2>
+          </div>
+
+          {floatingTodayTasks.length === 0 ? (
+            <div className="agenda-sidebar__empty">
+              <strong>Todo lo de hoy ya tiene horario.</strong>
+              <p>Buen punto de partida para sostener una rutina mas clara.</p>
+            </div>
+          ) : (
+            <div className="agenda-sidebar__list">
+              {floatingTodayTasks.map((task) => (
+                <article key={`floating-${task.id}`} className="agenda-task">
+                  <div className="agenda-task__header">
+                    <strong>{task.title}</strong>
+                    {task.recurrence && <span>Repite {recurrenceLabel(task.recurrence)}</span>}
+                  </div>
+                  <p>{task.description || "Sin descripcion adicional."}</p>
+                  <div className="agenda-task__meta">
+                    <span>Sin horario asignado</span>
+                    <span>{task.is_urgent ? "Urgente" : "Puede esperar un poco"}</span>
+                  </div>
+                </article>
+              ))}
+            </div>
+          )}
+        </aside>
       </section>
 
       {loadError && (

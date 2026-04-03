@@ -25,6 +25,7 @@ export default function CreateTask() {
     is_urgent: false,
     is_important: false,
     scheduled_for: null,
+    scheduled_time: null,
     recurrence: null,
     assigned_to_id: null,
   });
@@ -69,6 +70,10 @@ export default function CreateTask() {
       newErrors.scheduled_for = "Selecciona una fecha base para repetir esta tarea";
     }
 
+    if (formData.scheduled_time && !formData.scheduled_for) {
+      newErrors.scheduled_for = "Selecciona una fecha antes de asignar un horario";
+    }
+
     if (isSupervisor) {
       if (assignmentMode === "single" && !formData.assigned_to_id) {
         newErrors.assigned_to_id = "Selecciona una persona del staff";
@@ -109,6 +114,14 @@ export default function CreateTask() {
     setFormData((prev) => ({
       ...prev,
       recurrence: value || null,
+    }));
+  };
+
+  const handleScheduleTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setFormData((prev) => ({
+      ...prev,
+      scheduled_time: value || null,
     }));
   };
 
@@ -155,6 +168,7 @@ export default function CreateTask() {
         is_urgent: formData.is_urgent,
         is_important: formData.is_important,
         scheduled_for: formData.scheduled_for ?? null,
+        scheduled_time: formData.scheduled_time ?? null,
         recurrence: formData.recurrence ?? null,
       };
 
@@ -229,7 +243,7 @@ export default function CreateTask() {
               {errors.description && <p className="error fade-in">{errors.description}</p>}
             </div>
 
-            <div className="form-grid">
+            <div className="form-grid form-grid--schedule">
               <div className="form-field">
                 <label className={errors.scheduled_for ? "label-shake" : ""}>Programar para</label>
                 <input
@@ -242,6 +256,19 @@ export default function CreateTask() {
                   Si eliges fecha, la tarea va a aparecer en tu agenda personal.
                 </p>
                 {errors.scheduled_for && <p className="error fade-in">{errors.scheduled_for}</p>}
+              </div>
+
+              <div className="form-field">
+                <label>Horario</label>
+                <input
+                  type="time"
+                  value={formData.scheduled_time ?? ""}
+                  onChange={handleScheduleTimeChange}
+                  className="form-input"
+                />
+                <p className="subtle form-hint">
+                  Si lo completas, la agenda del dia lo va a mostrar como bloque ocupado.
+                </p>
               </div>
 
               <div className="form-field">

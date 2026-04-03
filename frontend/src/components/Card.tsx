@@ -50,6 +50,11 @@ function formatScheduleDate(value: string | null | undefined) {
   }).format(date);
 }
 
+function formatScheduleTime(value: string | null | undefined) {
+  if (!value) return null;
+  return value.slice(0, 5);
+}
+
 function recurrenceLabel(value: Task["recurrence"]) {
   switch (value) {
     case "daily":
@@ -118,6 +123,9 @@ export default function Card({
         {task.is_urgent && <span className="badge">Atencion hoy</span>}
         {task.scheduled_for && (
           <span className="badge">Agenda {formatScheduleDate(task.scheduled_for)}</span>
+        )}
+        {task.scheduled_time && (
+          <span className="badge">Hora {formatScheduleTime(task.scheduled_time)}</span>
         )}
         {task.recurrence && <span className="badge">Repite {recurrenceLabel(task.recurrence)}</span>}
       </div>

@@ -23,6 +23,7 @@ export default function EditTask() {
   const [isUrgent, setIsUrgent] = useState(false);
   const [isImportant, setIsImportant] = useState(false);
   const [scheduledFor, setScheduledFor] = useState<string | null>(null);
+  const [scheduledTime, setScheduledTime] = useState<string | null>(null);
   const [recurrence, setRecurrence] = useState<Task["recurrence"]>(null);
   const [assignedToId, setAssignedToId] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -59,6 +60,7 @@ export default function EditTask() {
         setIsUrgent(found.is_urgent);
         setIsImportant(found.is_important);
         setScheduledFor(found.scheduled_for ?? null);
+        setScheduledTime(found.scheduled_time ?? null);
         setRecurrence(found.recurrence ?? null);
         setAssignedToId(found.assigned_to_id ?? null);
       } catch (err: any) {
@@ -79,6 +81,7 @@ export default function EditTask() {
         is_urgent: isUrgent,
         is_important: isImportant,
         scheduled_for: scheduledFor ?? null,
+        scheduled_time: scheduledTime ?? null,
         recurrence: recurrence ?? null,
         assigned_to_id: isSupervisor ? assignedToId : undefined,
       });
@@ -152,7 +155,7 @@ export default function EditTask() {
               />
             </div>
 
-            <div className="form-grid">
+            <div className="form-grid form-grid--schedule">
               <div className="form-field">
                 <label>Programar para</label>
                 <input
@@ -163,6 +166,19 @@ export default function EditTask() {
                 />
                 <p className="subtle form-hint">
                   Si tiene fecha, la tarea tambien se ve dentro de la agenda personal.
+                </p>
+              </div>
+
+              <div className="form-field">
+                <label>Horario</label>
+                <input
+                  type="time"
+                  className="form-input"
+                  value={scheduledTime ?? ""}
+                  onChange={(e) => setScheduledTime(e.target.value || null)}
+                />
+                <p className="subtle form-hint">
+                  Si la tarea tiene hora, la agenda la ordena dentro del dia.
                 </p>
               </div>
 
