@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import "../../styles/Footer.css";
 
@@ -37,8 +38,34 @@ function GitHubIcon() {
 export default function Footer() {
   const location = useLocation();
   const isAuthPage = ["/login", "/register"].includes(location.pathname);
+  const [installPrompt, setInstallPrompt] = useState<{
+    prompt: () => Promise<void>;
+    userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
+  } | null>(null);
+
+  useEffect(() => {
+    const handleBeforeInstallPrompt = (event: Event) => {
+      event.preventDefault();
+      setInstallPrompt(
+        event as Event & {
+          prompt: () => Promise<void>;
+          userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
+        }
+      );
+    };
+
+    window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+    return () => window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+  }, []);
 
   if (isAuthPage) return null;
+
+  const handleInstallClick = async () => {
+    if (!installPrompt) return;
+    await installPrompt.prompt();
+    await installPrompt.userChoice;
+    setInstallPrompt(null);
+  };
 
   return (
     <footer className="footer">
@@ -50,6 +77,11 @@ export default function Footer() {
             Una experiencia pensada para separar lo urgente de lo importante y sostener el foco
             todos los dias.
           </p>
+          {installPrompt && (
+            <button type="button" className="btn-ghost footer__install" onClick={handleInstallClick}>
+              Instalar app
+            </button>
+          )}
         </div>
 
         <nav className="footer__nav" aria-label="Enlaces del footer">
