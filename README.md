@@ -1,84 +1,122 @@
-# EisenhowerApp 🧠
+# EisenhowerApp
 
-Aplicación web basada en la **Matriz de Eisenhower** para organizar tareas según su urgencia e importancia.  
-Permite priorizar de forma visual, clara y eficiente, separando tareas activas y completadas.
+EisenhowerApp es una aplicacion web de productividad basada en la Matriz de Eisenhower. Permite organizar tareas segun urgencia e importancia, visualizar prioridades con claridad y, en modo supervisor, coordinar trabajo con otras personas del staff.
 
----
+## Overview
 
-## ✨ Características principales
+La app combina una experiencia personal de gestion de tareas con una capa de supervision para equipos.
 
-- Creación de tareas con título, descripción y prioridad
-- Clasificación automática en los 4 cuadrantes de Eisenhower
-- Navegación por tareas mediante controles intuitivos (una tarjeta por cuadrante)
-- Vista separada para tareas activas y completadas
-- Posibilidad de completar, revertir o eliminar tareas
-- Animaciones suaves entre vistas y acciones (Framer Motion)
-- UI oscura moderna con sistema de temas centralizado
+- Usuarios individuales pueden crear, editar, completar y revisar tareas dentro de la matriz.
+- Supervisores pueden asignar tareas, crear copias para varias personas, monitorear carga del equipo y detectar trabajo sin responsable.
+- La experiencia distingue entre modo invitado, cuenta personal y cuenta supervisor.
 
----
+## Current Features
 
-## 🛠️ Tecnologías utilizadas
+- Creacion de tareas con titulo, descripcion y prioridad.
+- Clasificacion automatica en los 4 cuadrantes de Eisenhower.
+- Dashboard visual con una tarjeta activa por cuadrante y navegacion interna.
+- Historial de tareas completadas con opcion de reabrir.
+- Feedback visual con SweetAlert para confirmaciones, errores y acciones exitosas.
+- Estados vacios, loading states y retry states para mejorar UX.
+- Filtros por busqueda, cuadrante y orden en dashboard e historial.
+- Autenticacion con cuentas y persistencia de tareas en backend.
+- Migracion automatica de tareas locales al iniciar sesion o registrarse.
+- Diferenciacion clara entre modo invitado y cuenta activa.
+- Herramientas de supervisor:
+  - asignar tareas a una persona
+  - crear tareas para varias personas
+  - crear tareas para todo el staff
+  - duplicar tareas rapidamente para otras personas o todo el staff
+  - filtrar por alcance: todas, propias, equipo, sin asignar
+  - ver carga del equipo por persona
+  - detectar tareas sin asignar desde una bandeja dedicada
+
+## Roles
+
+### Usuario
+
+- Gestiona sus propias tareas.
+- Ve su dashboard personal y su historial.
+- Trabaja con foco individual.
+
+### Supervisor
+
+- Ve y gestiona tareas del equipo.
+- Asigna trabajo a otras personas.
+- Supervisa carga, urgencias y tareas sin asignar.
+- Duplica tareas para multiples responsables cuando hace falta.
+
+## Tech Stack
 
 ### Frontend
-- **React + Vite**
-- **TypeScript**
-- **React Router**
-- **Framer Motion**
-- CSS modular con variables de tema
+
+- React
+- Vite
+- TypeScript
+- React Router
+- Framer Motion
+- SweetAlert2
+- CSS con sistema visual propio
 
 ### Backend
-- **FastAPI (Python)**
-- **SQLAlchemy**
-- **SQLite** (escalable a PostgreSQL)
 
-### Arquitectura
-- Separación clara frontend / backend
-- Servicios desacoplados para consumo de API
-- Componentes reutilizables (EisenhowerMatrix, Card, Navbar)
+- FastAPI
+- SQLAlchemy
+- SQLite
 
----
+## Project Structure
 
-## 🚀 Instalación y ejecución local
-
-### 1. Clonar el repositorio
-```bash
-git clone https://github.com/ezebellino/eisenhowerapp.git
-cd eisenhowerapp
+```text
+EisenhowerApp/
+├── frontend/
+│   ├── src/
+│   └── styles/
+├── backend/
+│   ├── app/
+│   └── ...
+└── README.md
 ```
 
-### 2. Frontend
+## Local Setup
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/ezebellino/eisenhower-app.git
+cd EisenhowerApp
+```
+
+### 2. Run the frontend
+
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
 
-### 3. Backend
+### 3. Run the backend
+
 ```bash
 cd backend
 uvicorn main:app --reload
 ```
 
-## 📱 Responsive design
-La aplicación está adaptada para dispositivos móviles:
-    - **En pantallas pequeñas, los cuadrantes se muestran en columna**
-    - **El orden sigue la prioridad:**
-    - *Urgente & Importante -> Importante -> Urgente -> Ni Urgente, ni Importante*
+## Product Direction
 
-## 🧭 Roadmap / Próximas mejoras
+La app ya funciona como una herramienta personal de prioridades, pero su diferencial mas fuerte esta creciendo en la capa de supervision y coordinacion.
 
-    - Drag & Drop entre cuadrantes
+Proximos pasos naturales:
 
-    - Filtros por fecha y búsqueda
+- acciones mas rapidas de reasignacion desde cards o paneles
+- mejor visibilidad de carga operativa por equipo
+- vistas mas fuertes para seguimiento de tareas sin asignar
+- mejoras de accesibilidad y atajos de uso
+- evolucion de persistencia y despliegue productivo
 
-    - Soporte multiusuario con autenticación y rol
+## Author
 
-    - Persistencia en la nube (PostgreSQL / Supabase)
-
-    - Atajos de teclado y mejoras de accesibilidad
-
-## 👨‍💻 Autor
 **Ezequiel Bellino**
-Github:[www.github.com/ezebellino]
 
-Proyecto desarrollado como parte de mi portfolio profesional FullStack.
+- GitHub: https://github.com/ezebellino
+
+Proyecto desarrollado como parte de un portfolio Full Stack, con foco en producto, UX/UI y arquitectura frontend/backend desacoplada.
