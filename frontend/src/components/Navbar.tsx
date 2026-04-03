@@ -21,6 +21,13 @@ export default function Navbar() {
   const isAuthPage = ["/login", "/register"].includes(location.pathname);
   if (isAuthPage) return null;
 
+  const modeLabel = user ? "Cuenta activa" : "Modo invitado";
+  const modeHelper = user
+    ? user.role === "supervisor"
+      ? `Supervisor: ${user.username}`
+      : `Sincronizado como ${user.username}`
+    : "Tus tareas viven solo en este navegador";
+
   return (
     <header className="navbar">
       <div className="navbar__inner">
@@ -51,9 +58,12 @@ export default function Navbar() {
 
         <div className="navbar__right navbar__right--desktop">
           {!isLoading && (
-            <div className="navbar__status">
+            <div className={`navbar__status ${user?.role === "supervisor" ? "is-supervisor" : ""}`}>
               <span className={`navbar__status-dot ${user ? "is-online" : ""}`} />
-              {user ? `Sesion de ${user.username}` : "Modo personal"}
+              <span className="navbar__status-copy">
+                <strong>{modeLabel}</strong>
+                <small>{modeHelper}</small>
+              </span>
             </div>
           )}
 
@@ -67,8 +77,8 @@ export default function Navbar() {
                 Salir
               </button>
             ) : (
-              <Link to="/login" className="btn-ghost">
-                Iniciar sesion
+              <Link to="/register" className="btn-ghost">
+                Crear cuenta
               </Link>
             ))}
         </div>
@@ -89,9 +99,14 @@ export default function Navbar() {
       <div className={`navbar__mobile ${menuOpen ? "is-open" : ""}`}>
         <div className="navbar__mobile-content">
           {!isLoading && (
-            <div className="navbar__status navbar__status--mobile">
+            <div
+              className={`navbar__status navbar__status--mobile ${user?.role === "supervisor" ? "is-supervisor" : ""}`}
+            >
               <span className={`navbar__status-dot ${user ? "is-online" : ""}`} />
-              {user ? `Sesion de ${user.username}` : "Modo personal"}
+              <span className="navbar__status-copy">
+                <strong>{modeLabel}</strong>
+                <small>{modeHelper}</small>
+              </span>
             </div>
           )}
 
@@ -124,8 +139,8 @@ export default function Navbar() {
                   Salir
                 </button>
               ) : (
-                <Link to="/login" className="btn-ghost navbar__mobile-cta">
-                  Iniciar sesion
+                <Link to="/register" className="btn-ghost navbar__mobile-cta">
+                  Crear cuenta
                 </Link>
               ))}
           </div>

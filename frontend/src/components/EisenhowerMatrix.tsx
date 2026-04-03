@@ -8,6 +8,8 @@ type Props = {
   title?: string;
   description?: string;
   banner?: React.ReactNode;
+  toolbar?: React.ReactNode;
+  resolveAssigneeLabel?: (task: Task) => string | null;
   tasks: Task[];
   mode?: "active" | "completed";
   onComplete?: (id: TaskID) => Promise<void> | void;
@@ -95,7 +97,7 @@ function EmptyCollectionState({ mode }: { mode: "active" | "completed" }) {
     <div className="matrix-empty-state panel">
       <div className="matrix-empty-state__copy">
         <p className="matrix-empty-state__eyebrow">Primer paso</p>
-        <h2>Empezá cargando tu primera tarea.</h2>
+        <h2>Empeza cargando tu primera tarea.</h2>
         <p>
           Elegi si es urgente y si es importante. La matriz la va a ubicar automaticamente en el
           cuadrante correcto para que tengas claridad desde el inicio.
@@ -118,6 +120,8 @@ export default function EisenhowerMatrix({
   title,
   description,
   banner,
+  toolbar,
+  resolveAssigneeLabel,
   tasks,
   mode = "active",
   onComplete,
@@ -180,6 +184,7 @@ export default function EisenhowerMatrix({
           </div>
 
           {banner && <div className="matrix-banner">{banner}</div>}
+          {toolbar && <div className="matrix-toolbar">{toolbar}</div>}
         </div>
       )}
 
@@ -220,6 +225,7 @@ export default function EisenhowerMatrix({
                     <Card
                       key={String(selected.id)}
                       task={selected}
+                      assignmentLabel={resolveAssigneeLabel?.(selected) ?? null}
                       onComplete={onComplete}
                       onDelete={onDelete}
                       onUncomplete={onUncomplete}

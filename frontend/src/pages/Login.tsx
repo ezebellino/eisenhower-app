@@ -3,8 +3,15 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 import { showErrorAlert, showInfoAlert, showSuccessToast } from "../services/alertService";
 import { login } from "../services/authService";
+import { setSessionNotice } from "../services/sessionNoticeService";
 import { migrateLocalTasksToAccount } from "../services/taskMigrationService";
 import "../../styles/Login.css";
+
+const accountBenefits = [
+  "Tus tareas quedan guardadas y sincronizadas entre sesiones.",
+  "El historial y el progreso se vuelven persistentes.",
+  "Es la base para futuros flujos de supervisor y asignacion al staff.",
+];
 
 export default function Login() {
   const navigate = useNavigate();
@@ -27,30 +34,52 @@ export default function Login() {
 
       if (migratedCount > 0) {
         await showInfoAlert(
-          "Migración completada",
+          "Migracion completada",
           `Se copiaron ${migratedCount} tarea${migratedCount === 1 ? "" : "s"} local${migratedCount === 1 ? "" : "es"} a tu cuenta.`
         );
+        setSessionNotice(
+          `Sesion iniciada. Se migraron ${migratedCount} tarea${migratedCount === 1 ? "" : "s"} local${migratedCount === 1 ? "" : "es"} a tu cuenta.`
+        );
       } else {
-        await showSuccessToast("Sesión iniciada");
+        await showSuccessToast("Sesion iniciada");
+        setSessionNotice("Sesion iniciada. Ahora tus tareas quedan guardadas y sincronizadas en tu cuenta.");
       }
 
       navigate("/tasks");
     } catch (e: any) {
       const message = e?.message ?? "Error de login";
       setErr(message);
-      await showErrorAlert("No pudimos iniciar sesión", message);
+      await showErrorAlert("No pudimos iniciar sesion", message);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="auth-page">
+    <div className="auth-page auth-layout">
+      <section className="auth-aside panel">
+        <p className="auth-aside__eyebrow">Cuenta EisenhowerApp</p>
+        <h1 className="auth-title">Entrar tambien es darle continuidad al sistema.</h1>
+        <p className="auth-subtitle">
+          La cuenta convierte la matriz en una herramienta real de seguimiento: persistencia,
+          historial, sincronizacion y base para trabajo por roles.
+        </p>
+
+        <div className="auth-benefits">
+          {accountBenefits.map((benefit) => (
+            <article key={benefit} className="auth-benefit">
+              <span />
+              <p>{benefit}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
       <div className="auth-card panel">
         <div className="auth-header">
-          <h1 className="auth-title">Login</h1>
-          <p className="auth-subtitle">
-            Ingresá con tu usuario para ver y organizar tus tareas.
+          <h2 className="auth-form-title">Iniciar sesion</h2>
+          <p className="auth-form-subtitle">
+            Entra con tu usuario para recuperar tu espacio de trabajo.
           </p>
         </div>
 
@@ -64,9 +93,7 @@ export default function Login() {
             placeholder="tu_usuario"
           />
 
-          <label className="auth-label" style={{ marginTop: 12 }}>
-            Contraseña
-          </label>
+          <label className="auth-label auth-label--spaced">Contrasena</label>
           <input
             className="form-input auth-input"
             type="password"
@@ -81,24 +108,13 @@ export default function Login() {
           <button className="btn btn-primary auth-submit" type="submit" disabled={loading}>
             {loading ? "Ingresando..." : "Ingresar"}
           </button>
+
           <div className="auth-form-footer">
-                {/* boton de volver al inicio */ }
-            <button
-                type="button"
-                className="btn btn-ghost auth-cancel"
-                onClick={() => navigate("/")}
-                disabled={loading}
-            >
-                Volver al inicio
+            <button type="button" className="btn btn-ghost" onClick={() => navigate("/")}>
+              Volver al inicio
             </button>
-            {/* boton de registrar cuenta */ }          
-            <button
-                type="button"
-                className="btn btn-secondary auth-register"
-                onClick={() => navigate("/register")}
-                disabled={loading}
-            >
-                Registrar usuario
+            <button type="button" className="btn btn-secondary" onClick={() => navigate("/register")}>
+              Crear cuenta
             </button>
           </div>
         </form>
